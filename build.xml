@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="default-extensions">
+	<import file="../allset-config-ant/src/main/resources/target/maven/maven-build.xml" />
+</project>

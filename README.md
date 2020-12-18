@@ -16,16 +16,14 @@ These configurations can be reused in diverse projects.
 - Checkstyle
 
 # Usage
-Add the following section into your `pom.xml` file.
+In pom.xml, add the following xml between <build> ... </build>
 
 ```xml
- <build>
- 	<extensions>
-		<extension>
-			<groupId>org.default.extensions</groupId>
-			<artifactId>default-extensions</artifactId>
-			<version>${default-extensions.version}</version>
-		</extension>
-	</extensions>
-</build>   
+<extensions>
+	<extension>
+		<groupId>org.default.extensions</groupId>
+		<artifactId>default-extensions</artifactId>
+		<version>${default-extensions.version}</version>
+	</extension>
+</extensions>
 ```

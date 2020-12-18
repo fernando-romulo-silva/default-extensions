@@ -8,6 +8,13 @@
 A project with some tool configurations that I use in my projects. 
 These configurations can be reused in diverse projects.
 
+# Technologies 
+
+- Java
+- Maven
+- Spotbugs
+- Checkstyle
+
 # Usage
 Add the following section into your `pom.xml` file.
 

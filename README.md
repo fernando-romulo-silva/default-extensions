@@ -13,12 +13,12 @@ Add the following section into your `pom.xml` file.
 
 ```xml
  <build>
-		<extensions>
-			<extension>
-				<groupId>org.default.extensions</groupId>
-				<artifactId>default-extensions</artifactId>
-				<version>${allset.config.extensions.version}</version>
-			</extension>
-		</extensions>
+ 	<extensions>
+		<extension>
+			<groupId>org.default.extensions</groupId>
+			<artifactId>default-extensions</artifactId>
+			<version>${allset.config.extensions.version}</version>
+		</extension>
+	</extensions>
 </build>   
 ```

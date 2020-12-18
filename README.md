@@ -16,7 +16,7 @@ These configurations can be reused in diverse projects.
 - Checkstyle
 
 # Usage
-In pom.xml, add the following xml between <build> ... </build>
+In pom.xml, add the following xml between `<build> ... </build>`
 
 ```xml
 <extensions>

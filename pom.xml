@@ -16,8 +16,8 @@
 
 	<scm>
 		<url>https://github.com/fernando-romulo-silva/default-extensions</url>
-		<connection>scm:git:https://github.com/fernando-romulo-silva/default-extensions.git</connection>
-		<developerConnection>scm:git:https://github.com/fernando-romulo-silva/default-extensions.git</developerConnection>
+		<connection>scm:git:ssh://git@github.com/fernando-romulo-silva/default-extensions.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/fernando-romulo-silva/default-extensions.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 

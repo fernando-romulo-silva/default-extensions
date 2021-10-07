@@ -21,5 +21,6 @@
 		<tag>HEAD</tag>
 	</scm>
 
-
+	<!-- allset.config.extensions.version - configs for plugins like pmd, spotbugs and checkstyle -->
+	
 </project>

@@ -4,7 +4,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
-https://pmd.github.io/latest/pmd_rules_java_bestpractices.html
+
+	<!-- https://pmd.github.io/latest/pmd_rules_java_bestpractices.html -->
 
     <description>Quickstart configuration of PMD. Includes the rules that are most likely to apply everywhere.</description>
 

@@ -15,11 +15,17 @@
 	</Match>
 	 -->
 	 
-<rule ref="category/java/codestyle.xml/TooManyStaticImports">
-    <properties>
-        <property name="maximumStaticImports" value="20" />
-    </properties>
-</rule>
-	 
+	<rule ref="category/java/codestyle.xml/TooManyStaticImports">
+		<properties>
+			<property name="maximumStaticImports" value="20" />
+		</properties>
+	</rule>
+
+	<Match>
+		<Class name="~.*\.*$Builder" />
+		<Not>
+			<Bug code="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR" />
+		</Not>
+	</Match>	 
 
 </FindBugsFilter>

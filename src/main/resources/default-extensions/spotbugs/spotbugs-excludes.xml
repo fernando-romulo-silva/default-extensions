@@ -37,5 +37,10 @@
 		<Class name="~.*Test" />
 		<Bug pattern="NP_LOAD_OF_KNOWN_NULL_VALUE" />
 	</Match>
-
+	
+	<Match>
+		<Class name="~.*Test" />
+		<Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
+	</Match>
+	
 </FindBugsFilter>

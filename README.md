@@ -14,6 +14,7 @@ These configurations can be reused in diverse projects.
 - Maven
 - Spotbugs
 - Checkstyle
+- PMD
 
 # Install
 

@@ -77,11 +77,13 @@
 	<rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" />
 	<rule ref="category/java/codestyle.xml/FieldNamingConventions" />
 	<rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" />
+	
 	<rule ref="category/java/codestyle.xml/FormalParameterNamingConventions">
 		<properties>
 			<property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration['.*Test']" />
 		</properties>
-	</rule>  	
+	</rule>
+	  	
 	<rule ref="category/java/codestyle.xml/GenericsNaming" />
 	<rule ref="category/java/codestyle.xml/IdenticalCatchBranches" />
 	<rule ref="category/java/codestyle.xml/LinguisticNaming" />
@@ -147,7 +149,14 @@
 	<rule ref="category/java/design.xml/ImmutableField" />
 	<rule ref="category/java/design.xml/LawOfDemeter" />
 	<rule ref="category/java/design.xml/LogicInversion" />
-	<rule ref="category/java/design.xml/LoosePackageCoupling" />
+	
+	<rule ref="category/java/design.xml/LoosePackageCoupling">
+	    <properties>
+	        <property name="packages" value="" />
+	        <property name="classes" value="" />
+	    </properties>
+	</rule>
+	
 	<rule ref="category/java/design.xml/MutableStaticState" />
 	<rule ref="category/java/design.xml/NcssCount" />
 	<rule ref="category/java/design.xml/NPathComplexity" />
@@ -196,8 +205,21 @@
 	<rule ref="category/java/errorprone.xml/AvoidLosingExceptionInformation" />
 	<rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators" />
 	<rule ref="category/java/errorprone.xml/AvoidUsingOctalValues" />
-	<rule ref="category/java/errorprone.xml/BadComparison" />
-	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize" />
+	<rule ref="category/java/errorprone.xml/BadComparison"  />
+	
+	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize">
+		<properties>
+	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|javax.inject.Inject|javax.persistence.Column" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config|Test$|Builder$')]" />
+	        
+	        <!--  
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />
+	        <property name="violationSuppressXPath" value="//UserClass[@SuperTypeName = 'Serializable']"/>
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[contains(@Image, 'Service')]" />
+	        -->
+		</properties>
+	</rule>
+	
 	<rule ref="category/java/errorprone.xml/BrokenNullCheck" />
 	<rule ref="category/java/errorprone.xml/CallSuperFirst" />
 	<rule ref="category/java/errorprone.xml/CallSuperLast" />
@@ -212,7 +234,7 @@
 	<rule ref="category/java/errorprone.xml/ConstructorCallsOverridableMethod" />
 	<rule ref="category/java/errorprone.xml/DetachedTestCase" />
 	<rule ref="category/java/errorprone.xml/DoNotCallGarbageCollectionExplicitly" />
-	<rule ref="category/java/errorprone.xml/DoNotCallSystemExit" />
+	<rule ref="category/java/errorprone.xml/DoNotCallSystemExit"  />
 	<rule ref="category/java/errorprone.xml/DoNotExtendJavaLangThrowable" />
 	<rule ref="category/java/errorprone.xml/DoNotHardCodeSDCard" />
 	<rule ref="category/java/errorprone.xml/DoNotTerminateVM" />
@@ -240,7 +262,7 @@
 	<rule ref="category/java/errorprone.xml/JUnitStaticSuite" />
 	<rule ref="category/java/errorprone.xml/MethodWithSameNameAsEnclosingClass" />
 	<rule ref="category/java/errorprone.xml/MisplacedNullCheck" />
-	<rule ref="category/java/errorprone.xml/MissingBreakInSwitch" />
+	<rule ref="category/java/errorprone.xml/MissingBreakInSwitch"  />
 	<rule ref="category/java/errorprone.xml/MissingSerialVersionUID" />
 	<rule ref="category/java/errorprone.xml/MissingStaticMethodInNonInstantiatableClass" />
 	<rule ref="category/java/errorprone.xml/MoreThanOneLogger" />
@@ -322,7 +344,5 @@
 
 	<rule ref="category/java/security.xml/HardCodedCryptoKey" />
 	<rule ref="category/java/security.xml/InsecureCryptoIv" />
-
-
 
 </ruleset>	

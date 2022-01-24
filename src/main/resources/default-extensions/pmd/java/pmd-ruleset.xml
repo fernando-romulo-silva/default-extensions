@@ -61,7 +61,18 @@
 	<!-- ======== CODE STYLE ============================================================================================================================== -->
 	<!-- ================================================================================================================================================== -->
 
-	<rule ref="category/java/codestyle.xml/AtLeastOneConstructor" />
+	<rule ref="category/java/codestyle.xml/AtLeastOneConstructor" >
+	
+		<properties>
+	        <property name="ignoredAnnotations" value="org.springframework.context.annotation.Configuration" />
+	        <!--
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[contains(@Image, 'Service')]" />
+	        -->
+		</properties>	
+	
+	</rule>
 	<rule ref="category/java/codestyle.xml/AvoidDollarSigns" />
 	<rule ref="category/java/codestyle.xml/AvoidProtectedFieldInFinalClass" />
 	<rule ref="category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending" />
@@ -91,7 +102,13 @@
 	<rule ref="category/java/codestyle.xml/LocalInterfaceSessionNamingConvention" />
 	<rule ref="category/java/codestyle.xml/LocalVariableCouldBeFinal" />
 	<rule ref="category/java/codestyle.xml/LocalVariableNamingConventions" />
-	<rule ref="category/java/codestyle.xml/LongVariable" />
+	
+	<rule ref="category/java/codestyle.xml/LongVariable" >
+	    <properties>
+	        <property name="minimum" value="50" />
+	    </properties>
+	</rule>
+	
 	<rule ref="category/java/codestyle.xml/MDBAndSessionBeanNamingConvention" />
 	<rule ref="category/java/codestyle.xml/MethodArgumentCouldBeFinal" />
 	<rule ref="category/java/codestyle.xml/MethodNamingConventions" />
@@ -103,7 +120,22 @@
 	<rule ref="category/java/codestyle.xml/RemoteSessionInterfaceNamingConvention" />
 	<rule ref="category/java/codestyle.xml/ShortClassName" />
 	<rule ref="category/java/codestyle.xml/ShortMethodName" />
-	<rule ref="category/java/codestyle.xml/ShortVariable" />
+	
+	<rule ref="category/java/codestyle.xml/ShortVariable" >
+	    <properties>
+	        <property name="minimum" value="3" />
+	        
+            <property name="xpath">
+                <value>
+                    //VariableDeclaratorId[(string-length(@Image) &lt; 3) and (not (@Image='id'))]
+                    [not(ancestor::ForInit)]
+                    [not((ancestor::FormalParameter) and (ancestor::TryStatement))]
+                </value>
+            </property>	        
+	        
+	    </properties>	
+	</rule>
+	
 	<rule ref="category/java/codestyle.xml/TooManyStaticImports" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryAnnotationValueElement" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryCast" />
@@ -187,7 +219,14 @@
 		</properties>	
 	</rule>
 	
-	<rule ref="category/java/documentation.xml/CommentSize" />
+	<rule ref="category/java/documentation.xml/CommentSize">
+		<properties>
+			<property name="maxLines" value="10" />
+			<property name="maxLineLength" value="180" />
+		</properties>
+	</rule>
+	
+	
 	<rule ref="category/java/documentation.xml/UncommentedEmptyConstructor" />
 	<rule ref="category/java/documentation.xml/UncommentedEmptyMethodBody" />
 
@@ -286,8 +325,8 @@
 		<properties>
 	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|javax.inject.Inject|javax.persistence.Column" />
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config|Test$|Builder$')]" />
-	          
 	        <!--
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[contains(@Image, 'Service')]" />
 	        -->

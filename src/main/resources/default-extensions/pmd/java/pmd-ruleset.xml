@@ -323,7 +323,7 @@
 	
 	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize">
 		<properties>
-	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|javax.inject.Inject|javax.persistence.Column" />
+	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|org.springframework.beans.factory.annotation.Value|javax.inject.Inject|javax.persistence.Column" />
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config|Test$|Builder$')]" />
 	        <!--
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />

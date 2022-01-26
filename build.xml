@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="default-extensions">
 	<import>
+		<javaresource classpath="ant-common-tasks.jar" name="macrodefs/maven/maven-art-macrodef.xml" />
 		<javaresource classpath="ant-common-tasks.jar" name="macrodefs/maven/maven-build-macrodef.xml" />
 		<javaresource classpath="ant-common-tasks.jar" name="targets/maven/maven-scm.xml" />
 	</import>
@@ -15,7 +16,7 @@ ${build.install.description}
 
 		<input-args profile="profile" modules-specified="modules-specified" modules-dependents="modules-dependents" modules-dependencies="modules-dependencies" />
 
-		<build-clean profile="${profile}" modules-specified="${modules-specified}" modules-dependents="${modules-dependents}" modules-dependencies="${modules-dependencies}" />
+		<art-clean profile="${profile}" modules-specified="${modules-specified}" modules-dependents="${modules-dependents}" modules-dependencies="${modules-dependencies}" />
 		<build-install profile="${profile}" modules-specified="${modules-specified}" modules-dependents="${modules-dependents}" modules-dependencies="${modules-dependencies}" />
 	</target>
 	

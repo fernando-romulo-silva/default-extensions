@@ -61,18 +61,15 @@
 	<!-- ======== CODE STYLE ============================================================================================================================== -->
 	<!-- ================================================================================================================================================== -->
 
+	<!-- 
 	<rule ref="category/java/codestyle.xml/AtLeastOneConstructor" >
-	
 		<properties>
 	        <property name="ignoredAnnotations" value="org.springframework.context.annotation.Configuration" />
-	        <!--
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[contains(@Image, 'Service')]" />
-	        -->
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Servlet$|Filter$|Config$|Test$|Builder$')]" />
 		</properties>	
-	
 	</rule>
+	 -->
+	
 	<rule ref="category/java/codestyle.xml/AvoidDollarSigns" />
 	<rule ref="category/java/codestyle.xml/AvoidProtectedFieldInFinalClass" />
 	<rule ref="category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending" />
@@ -222,7 +219,7 @@
 	<rule ref="category/java/documentation.xml/CommentSize">
 		<properties>
 			<property name="maxLines" value="10" />
-			<property name="maxLineLength" value="180" />
+			<property name="maxLineLength" value="280" />
 		</properties>
 	</rule>
 	
@@ -251,7 +248,6 @@
 	<rule ref="category/java/errorprone.xml/AvoidLosingExceptionInformation" />
 	<rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators" />
 	<rule ref="category/java/errorprone.xml/AvoidUsingOctalValues" />
-
 	<rule ref="category/java/errorprone.xml/BrokenNullCheck" />
 	<rule ref="category/java/errorprone.xml/CallSuperFirst" />
 	<rule ref="category/java/errorprone.xml/CallSuperLast" />
@@ -320,11 +316,13 @@
 	<rule ref="category/java/errorprone.xml/UselessOperationOnImmutable" />
 	<rule ref="category/java/errorprone.xml/UseLocaleWithCaseConversions" />
 	<rule ref="category/java/errorprone.xml/UseProperClassLoader" />
+	<rule ref="category/java/errorprone.xml/ImplicitSwitchFallThrough" />
+	<rule ref="category/java/errorprone.xml/ComparisonWithNaN" />
 	
 	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize">
 		<properties>
 	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|org.springframework.beans.factory.annotation.Value|javax.inject.Inject|javax.persistence.Column" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config|Test$|Builder$')]" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config$|Test$|Builder$')]" />
 	        <!--
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />
@@ -332,7 +330,7 @@
 	        -->
 		</properties>
 	</rule>	
-
+	
 	<!-- ================================================================================================================================================== -->
 	<!-- ======== MULTI THREADING ========================================================================================================================= -->
 	<!-- ================================================================================================================================================== -->

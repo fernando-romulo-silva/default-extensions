@@ -77,7 +77,11 @@
 	<rule ref="category/java/codestyle.xml/BooleanGetMethodName" />
 	<rule ref="category/java/codestyle.xml/CallSuperInConstructor" />
 	<rule ref="category/java/codestyle.xml/ClassNamingConventions" />
+	
+	<!-- 
 	<rule ref="category/java/codestyle.xml/CommentDefaultAccessModifier" />
+	 -->
+	
 	<rule ref="category/java/codestyle.xml/ConfusingTernary" />
 	<rule ref="category/java/codestyle.xml/ControlStatementBraces" />
 	<rule ref="category/java/codestyle.xml/EmptyMethodInAbstractClassShouldBeAbstract" />
@@ -176,7 +180,11 @@
 	<rule ref="category/java/design.xml/FinalFieldCouldBeStatic" />
 	<rule ref="category/java/design.xml/GodClass" />
 	<rule ref="category/java/design.xml/ImmutableField" />
+	
+	<!-- 
 	<rule ref="category/java/design.xml/LawOfDemeter" />
+	 -->
+	 
 	<rule ref="category/java/design.xml/LogicInversion" />
 	
 	<rule ref="category/java/design.xml/LoosePackageCoupling">

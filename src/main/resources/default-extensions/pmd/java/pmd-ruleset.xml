@@ -137,7 +137,12 @@
 	    </properties>	
 	</rule>
 	
-	<rule ref="category/java/codestyle.xml/TooManyStaticImports" />
+	<rule ref="category/java/codestyle.xml/TooManyStaticImports" >
+	    <properties>
+	        <property name="maximumStaticImports" value="8" />
+	    </properties>	
+	</rule>
+	
 	<rule ref="category/java/codestyle.xml/UnnecessaryAnnotationValueElement" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryCast" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryConstructor" />
@@ -335,7 +340,7 @@
 	
 	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize">
 		<properties>
-	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|org.springframework.beans.factory.annotation.Value|javax.inject.Inject|javax.persistence.Column" />
+	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|org.springframework.beans.factory.annotation.Value|javax.inject.Inject|javax.persistence.Column|javax.persistence.JoinColumn|javax.persistence.ManyToOne" />
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config$|Test$|Builder$')]" />
 	        <!--
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />

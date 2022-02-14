@@ -128,7 +128,7 @@
 	        
             <property name="xpath">
                 <value>
-                    //VariableDeclaratorId[(string-length(@Image) &lt; 3) and (not (@Image='id'))]
+                    //VariableDeclaratorId[(string-length(@Image) &lt; 3) and (not (@Image='id') and (not (@Image='ex')))]
                     [not(ancestor::ForInit)]
                     [not((ancestor::FormalParameter) and (ancestor::TryStatement))]
                 </value>

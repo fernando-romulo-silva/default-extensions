@@ -30,7 +30,14 @@
 	<rule ref="category/java/bestpractices.xml/JUnit4TestShouldUseBeforeAnnotation" />
 	<rule ref="category/java/bestpractices.xml/JUnit4TestShouldUseTestAnnotation" />
 	<rule ref="category/java/bestpractices.xml/JUnit5TestShouldBePackagePrivate" />
-	<rule ref="category/java/bestpractices.xml/JUnitAssertionsShouldIncludeMessage" />
+	
+	<rule ref="category/java/bestpractices.xml/JUnitAssertionsShouldIncludeMessage">
+	    <properties>
+	        <!-- suppress for AssertJ assertThat method -->
+	        <property name="violationSuppressXPath" value=".[@Image='assertThat'][../following-sibling::PrimarySuffix[1][@ArgumentCount=1]]" />
+	    </properties>
+	</rule>	
+	
 	
 	<rule ref="category/java/bestpractices.xml/JUnitTestContainsTooManyAsserts">
 	    <properties>
@@ -76,7 +83,10 @@
 	</rule>
 	 -->
 	
+	<!-- 
 	<rule ref="category/java/codestyle.xml/AvoidDollarSigns" />
+	 -->
+	 
 	<rule ref="category/java/codestyle.xml/AvoidProtectedFieldInFinalClass" />
 	<rule ref="category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending" />
 	<rule ref="category/java/codestyle.xml/AvoidUsingNativeCode" />
@@ -134,7 +144,7 @@
 	        
             <property name="xpath">
                 <value>
-                    //VariableDeclaratorId[(string-length(@Image) &lt; 3) and (not (@Image='id') and (not (@Image='ex')))]
+                    //VariableDeclaratorId[(string-length(@Image) &lt; 3) and (not (@Image='id') and (not (@Image='ex')) and (not (@Image='$')))]
                     [not(ancestor::ForInit)]
                     [not((ancestor::FormalParameter) and (ancestor::TryStatement))]
                 </value>
@@ -145,7 +155,7 @@
 	
 	<rule ref="category/java/codestyle.xml/TooManyStaticImports" >
 	    <properties>
-	        <property name="maximumStaticImports" value="15" />
+	        <property name="maximumStaticImports" value="20" />
 	    </properties>	
 	</rule>
 	
@@ -347,7 +357,7 @@
 	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize">
 		<properties>
 	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|org.springframework.beans.factory.annotation.Value|javax.inject.Inject|javax.persistence.Column|javax.persistence.JoinColumn|javax.persistence.ManyToOne" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config$|Test$|Builder$')]" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config$|Test$|Builder$|Aspect$')]" />
 	        <!--
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />

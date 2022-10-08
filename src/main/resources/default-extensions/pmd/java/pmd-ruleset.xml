@@ -243,7 +243,11 @@
 	<rule ref="category/java/design.xml/TooManyMethods" />
 	<rule ref="category/java/design.xml/UselessOverridingMethod" />
 	<rule ref="category/java/design.xml/UseObjectForClearerAPI" />
-	<rule ref="category/java/design.xml/UseUtilityClass" />
+	<rule ref="category/java/design.xml/UseUtilityClass">
+	    <properties>
+	        <property name="ignoredAnnotations" value="org.springframework.boot.autoconfigure.SpringBootApplication"/>
+	    </properties>
+	</rule>
 
 
 	<!-- ================================================================================================================================================== -->
@@ -297,7 +301,7 @@
 	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize">
 		<properties>
 	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|org.springframework.beans.factory.annotation.Value|javax.inject.Inject|javax.persistence.Column|javax.persistence.JoinColumn|javax.persistence.ManyToOne" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config$|Test$|Builder$|Aspect$')]" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config$|Test$|Builder$|Aspect$|Tasklet$|Configuration$|Reader$|Processor$|Writer$|Decider$|Mapper$')]" />
 	        <!--
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />
 	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />

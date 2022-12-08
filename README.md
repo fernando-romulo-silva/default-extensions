@@ -41,7 +41,7 @@ In pom.xml, add the following xml between `<build> ... </build>`
 <extensions>
 	<extension>
 		<groupId>org.default.extensions</groupId>
-		<artifactId>default-extensions</artifactId>
+		<artifactId>default-extensions-files</artifactId>
 		<version>${default-extensions.version}</version>
 	</extension>
 </extensions>

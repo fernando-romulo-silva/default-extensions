@@ -3,6 +3,7 @@
 	<groupId>org.default.extensions</groupId>
 	<version>0.0.1-SNAPSHOT</version>
 	<artifactId>default-extensions</artifactId>
+	<packaging>pom</packaging>
 
 	<licenses>
 		<license>
@@ -20,6 +21,11 @@
 		<developerConnection>scm:git:ssh://git@github.com/fernando-romulo-silva/default-extensions.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
+	
+	<modules>
+		<module>default-extensions-files</module>
+		<module>default-extensions-client</module>
+	</modules>
 
 	<!-- allset.config.extensions.version - configs for plugins like pmd, spotbugs and checkstyle -->
 	

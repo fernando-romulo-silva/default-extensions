@@ -26,6 +26,8 @@ public class ToolsConfigs {
 	final var webClient = new WebClient(FIREFOX_ESR);
 	webClient.getOptions().setJavaScriptEnabled(false);
 	webClient.getOptions().setCssEnabled(false);
+	
+//	https://checkstyle.sourceforge.io/checks.html
 
 	final var rulesUrls = List.of( //
 			Map.entry("ANNOTATIONS", "https://checkstyle.sourceforge.io/config_annotation.html"), //
@@ -38,7 +40,7 @@ public class ToolsConfigs {
 			Map.entry("METRICS", "https://checkstyle.sourceforge.io/config_metrics.html"), //
 			Map.entry("MISC", "https://checkstyle.sourceforge.io/config_misc.html"), //
 			Map.entry("MODIFIER", "https://checkstyle.sourceforge.io/config_modifier.html"), //
-			Map.entry("NAMING", "https://checkstyle.sourceforge.io/config_naming.html"), //
+			Map.entry("NAMING", "https://checkstyle.sourceforge.io/checks/naming"), //
 			Map.entry("REGEXP", "https://checkstyle.sourceforge.io/config_regexp.html"), //
 			Map.entry("SIZES", "https://checkstyle.sourceforge.io/config_sizes.html"), //
 			Map.entry("WHITE SPACES", "https://checkstyle.sourceforge.io/config_whitespace.html") //

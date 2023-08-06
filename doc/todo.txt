@@ -1,0 +1,4 @@
+* fix the README.md
+---> explain the submodules
+
+* Generate an xml config from the older one 

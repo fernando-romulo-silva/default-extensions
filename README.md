@@ -5,12 +5,15 @@
 
 # About
 
-A project with some tool configurations that I use in my projects. <br />
-These configurations can be reused in diverse projects.
+Maven extensions are a list of artifacts that are to be used in this build. 
+They will be included in the running build's classpath.
+The idea of this project is to reuse these artifacts in all projects that make sense.
+So far, I create artifcats for Spotbugs, Checkstyle and PMD.
 
 # Technologies 
 
 - Java
+- Ant
 - Maven
 - Spotbugs
 - Checkstyle

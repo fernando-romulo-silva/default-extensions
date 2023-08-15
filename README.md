@@ -26,19 +26,24 @@ requirements (environment variables configured):
  - Maven 3
  
 ```bash
-# clone it
-git clone https://github.com/fernando-romulo-silva/default-extensions
-
-# access the project folder
-cd default-extensions
-
-# execute
-mvn install
+$ git clone https://github.com/fernando-romulo-silva/default-extensions
 ```
 
-# How to Use
+Access the project folder:
 
-In pom.xml, add the following xml between `<build> ... </build>`
+```bash
+$ cd default-extensions
+```
+
+Then execute execute:
+
+```bash
+$ mvn install
+```
+
+# How to Use (Maven)
+
+In your pom.xml project, add the following xml between `<build> ... </build>`
 
 ```xml
 <extensions>

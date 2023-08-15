@@ -26,19 +26,19 @@ requirements (environment variables configured):
  - Maven 3
  
 ```bash
-$ git clone https://github.com/fernando-romulo-silva/default-extensions
+git clone https://github.com/fernando-romulo-silva/default-extensions
 ```
 
 Access the project folder:
 
 ```bash
-$ cd default-extensions
+cd default-extensions
 ```
 
 Then execute execute:
 
 ```bash
-$ mvn install
+mvn install
 ```
 
 # How to Use (Maven)

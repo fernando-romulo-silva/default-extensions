@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ruleset name="default-pmd-excludes" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+<ruleset name="default-pmd-excludes" 
+     xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" 
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
 	<description>PMD Default Extension Rule Set</description>
 
-	<!-- ================================================================================================================================================== -->
-	<!-- ======== BEST PRACTICES ========================================================================================================================== -->
-	<!-- ================================================================================================================================================== -->
+ <!-- ================================================================================================================================================== --> 
+ <!-- ======== BEST PRACTICES ========================================================================================================================== --> 
+ <!-- ================================================================================================================================================== -->
+ 
+	<rule ref="category/java/bestpractices.xml/JUnitAssertionsShouldIncludeMessage">
+	    <properties>
+	        <!-- suppress for AssertJ assertThat method -->
+	        <property name="violationSuppressXPath" value=".[@Image='assertThat'][../following-sibling::PrimarySuffix[1][@ArgumentCount=1]]" />
+	    </properties>
+	</rule>	
+	
+	<rule ref="category/java/bestpractices.xml/JUnitTestContainsTooManyAsserts">
+	    <properties>
+	        <property name="maximumAsserts" value="3" />
+	    </properties>
+	</rule>  
 
 	<rule ref="category/java/bestpractices.xml/AbstractClassWithoutAbstractMethod" />
 	<rule ref="category/java/bestpractices.xml/AccessorClassGeneration" />
@@ -30,20 +46,6 @@
 	<rule ref="category/java/bestpractices.xml/JUnit4TestShouldUseBeforeAnnotation" />
 	<rule ref="category/java/bestpractices.xml/JUnit4TestShouldUseTestAnnotation" />
 	<rule ref="category/java/bestpractices.xml/JUnit5TestShouldBePackagePrivate" />
-	
-	<rule ref="category/java/bestpractices.xml/JUnitAssertionsShouldIncludeMessage">
-	    <properties>
-	        <!-- suppress for AssertJ assertThat method -->
-	        <property name="violationSuppressXPath" value=".[@Image='assertThat'][../following-sibling::PrimarySuffix[1][@ArgumentCount=1]]" />
-	    </properties>
-	</rule>	
-	
-	<rule ref="category/java/bestpractices.xml/JUnitTestContainsTooManyAsserts">
-	    <properties>
-	        <property name="maximumAsserts" value="3" />
-	    </properties>
-	</rule>
-	
 	<rule ref="category/java/bestpractices.xml/JUnitTestsShouldIncludeAssert" />
 	<rule ref="category/java/bestpractices.xml/JUnitUseExpected" />
 	<rule ref="category/java/bestpractices.xml/LiteralsFirstInComparisons" />
@@ -73,77 +75,12 @@
 	<rule ref="category/java/bestpractices.xml/UseTryWithResources" />
 	<rule ref="category/java/bestpractices.xml/UseVarargs" />
 	<rule ref="category/java/bestpractices.xml/WhileLoopWithLiteralBoolean" />
-	
-	<!-- ================================================================================================================================================== -->
-	<!-- ======== CODE STYLE ============================================================================================================================== -->
-	<!-- ================================================================================================================================================== -->
 
-	<!-- 
-	<rule ref="category/java/codestyle.xml/AtLeastOneConstructor" >
-		<properties>
-	        <property name="ignoredAnnotations" value="org.springframework.context.annotation.Configuration" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Servlet$|Filter$|Config$|Test$|Builder$')]" />
-		</properties>	
-	</rule>
-	 -->
-	 
-	<!-- 
-	<rule ref="category/java/codestyle.xml/AvoidDollarSigns" />
-	 -->
-	 
-	<rule ref="category/java/codestyle.xml/AvoidProtectedFieldInFinalClass" />
-	<rule ref="category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending" />
-	<rule ref="category/java/codestyle.xml/AvoidUsingNativeCode" />
-	<rule ref="category/java/codestyle.xml/BooleanGetMethodName" />
-	<rule ref="category/java/codestyle.xml/CallSuperInConstructor" />
-	<rule ref="category/java/codestyle.xml/ClassNamingConventions" />
 
-	<!-- 
-	<rule ref="category/java/codestyle.xml/CommentDefaultAccessModifier" />
-	 -->
-	 
-	<rule ref="category/java/codestyle.xml/ConfusingTernary" />
-	<rule ref="category/java/codestyle.xml/ControlStatementBraces" />
-	<rule ref="category/java/codestyle.xml/EmptyControlStatement" />
-	<rule ref="category/java/codestyle.xml/EmptyMethodInAbstractClassShouldBeAbstract" />
-	<rule ref="category/java/codestyle.xml/ExtendsObject" />
-	<rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" />
-	<rule ref="category/java/codestyle.xml/FieldNamingConventions" />
-	<rule ref="category/java/codestyle.xml/FinalParameterInAbstractMethod" />
-	<rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" />
-
-	<rule ref="category/java/codestyle.xml/FormalParameterNamingConventions">
-		<properties>
-			<property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration['.*Test']" />
-		</properties>
-	</rule>
-	
-	<rule ref="category/java/codestyle.xml/GenericsNaming" />
-	<rule ref="category/java/codestyle.xml/IdenticalCatchBranches" />
-	<rule ref="category/java/codestyle.xml/LinguisticNaming" />
-	<rule ref="category/java/codestyle.xml/LocalHomeNamingConvention" />
-	<rule ref="category/java/codestyle.xml/LocalInterfaceSessionNamingConvention" />
-	<rule ref="category/java/codestyle.xml/LocalVariableCouldBeFinal" />
-	<rule ref="category/java/codestyle.xml/LocalVariableNamingConventions" />
-
-	<rule ref="category/java/codestyle.xml/LongVariable" >
-	    <properties>
-	        <property name="minimum" value="50" />
-	    </properties>
-	</rule>
-	
-	<rule ref="category/java/codestyle.xml/MDBAndSessionBeanNamingConvention" />
-	<rule ref="category/java/codestyle.xml/MethodArgumentCouldBeFinal" />
-	<rule ref="category/java/codestyle.xml/MethodNamingConventions" />
-	<rule ref="category/java/codestyle.xml/NoPackage" />
-	<rule ref="category/java/codestyle.xml/OnlyOneReturn" />
-	<rule ref="category/java/codestyle.xml/PackageCase" />
-	<rule ref="category/java/codestyle.xml/PrematureDeclaration" />
-	<rule ref="category/java/codestyle.xml/RemoteInterfaceNamingConvention" />
-	<rule ref="category/java/codestyle.xml/RemoteSessionInterfaceNamingConvention" />
-	<rule ref="category/java/codestyle.xml/ShortClassName" />
-	<rule ref="category/java/codestyle.xml/ShortMethodName" />
-
+ <!-- ================================================================================================================================================== --> 
+ <!-- ======== CODE STYLE ============================================================================================================================== --> 
+ <!-- ================================================================================================================================================== -->
+ 
 	<rule ref="category/java/codestyle.xml/ShortVariable" >
 	    <properties>
 	        <property name="minimum" value="3" />
@@ -164,7 +101,66 @@
 	        <property name="maximumStaticImports" value="20" />
 	    </properties>	
 	</rule>
+	
+	<rule ref="category/java/codestyle.xml/FormalParameterNamingConventions">
+		<properties>
+			<property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration['.*Test']" />
+		</properties>
+	</rule>
+	
+	<rule ref="category/java/codestyle.xml/LongVariable" >
+	    <properties>
+	        <property name="minimum" value="50" />
+	    </properties>
+	</rule>		
 
+	<!-- 
+	<rule ref="category/java/codestyle.xml/AtLeastOneConstructor" >
+		<properties>
+	        <property name="ignoredAnnotations" value="org.springframework.context.annotation.Configuration" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Servlet$|Filter$|Config$|Test$|Builder$')]" />
+		</properties>	
+	</rule>
+	 -->
+	 
+	<!-- 
+	<rule ref="category/java/codestyle.xml/AvoidDollarSigns" />
+	<rule ref="category/java/codestyle.xml/CommentDefaultAccessModifier" />
+	 -->  
+
+	<rule ref="category/java/codestyle.xml/AvoidProtectedFieldInFinalClass" />
+	<rule ref="category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending" />
+	<rule ref="category/java/codestyle.xml/AvoidUsingNativeCode" />
+	<rule ref="category/java/codestyle.xml/BooleanGetMethodName" />
+	<rule ref="category/java/codestyle.xml/CallSuperInConstructor" />
+	<rule ref="category/java/codestyle.xml/ClassNamingConventions" />
+	<rule ref="category/java/codestyle.xml/ConfusingTernary" />
+	<rule ref="category/java/codestyle.xml/ControlStatementBraces" />
+	<rule ref="category/java/codestyle.xml/EmptyControlStatement" />
+	<rule ref="category/java/codestyle.xml/EmptyMethodInAbstractClassShouldBeAbstract" />
+	<rule ref="category/java/codestyle.xml/ExtendsObject" />
+	<rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass" />
+	<rule ref="category/java/codestyle.xml/FieldNamingConventions" />
+	<rule ref="category/java/codestyle.xml/FinalParameterInAbstractMethod" />
+	<rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" />
+	<rule ref="category/java/codestyle.xml/GenericsNaming" />
+	<rule ref="category/java/codestyle.xml/IdenticalCatchBranches" />
+	<rule ref="category/java/codestyle.xml/LinguisticNaming" />
+	<rule ref="category/java/codestyle.xml/LocalHomeNamingConvention" />
+	<rule ref="category/java/codestyle.xml/LocalInterfaceSessionNamingConvention" />
+	<rule ref="category/java/codestyle.xml/LocalVariableCouldBeFinal" />
+	<rule ref="category/java/codestyle.xml/LocalVariableNamingConventions" />
+	<rule ref="category/java/codestyle.xml/MDBAndSessionBeanNamingConvention" />
+	<rule ref="category/java/codestyle.xml/MethodArgumentCouldBeFinal" />
+	<rule ref="category/java/codestyle.xml/MethodNamingConventions" />
+	<rule ref="category/java/codestyle.xml/NoPackage" />
+	<rule ref="category/java/codestyle.xml/OnlyOneReturn" />
+	<rule ref="category/java/codestyle.xml/PackageCase" />
+	<rule ref="category/java/codestyle.xml/PrematureDeclaration" />
+	<rule ref="category/java/codestyle.xml/RemoteInterfaceNamingConvention" />
+	<rule ref="category/java/codestyle.xml/RemoteSessionInterfaceNamingConvention" />
+	<rule ref="category/java/codestyle.xml/ShortClassName" />
+	<rule ref="category/java/codestyle.xml/ShortMethodName" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryAnnotationValueElement" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryCast" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryConstructor" />
@@ -180,9 +176,35 @@
 	<rule ref="category/java/codestyle.xml/UseShortArrayInitializer" />
 	<rule ref="category/java/codestyle.xml/UseUnderscoresInNumericLiterals" />
 
-	<!-- ================================================================================================================================================== -->
-	<!-- ======== DESIGN ================================================================================================================================== -->
-	<!-- ================================================================================================================================================== -->
+
+ <!-- ================================================================================================================================================== --> 
+ <!-- ======== DESIGN ========================================================================================================================== --> 
+ <!-- ================================================================================================================================================== -->
+ 
+	<rule ref="category/java/design.xml/ExcessiveImports">
+	    <properties>
+	        <property name="minimum" value="50.0" />
+	    </properties>
+	</rule>
+	
+	<!-- 
+	<rule ref="category/java/design.xml/LawOfDemeter" />
+	 -->
+
+	<rule ref="category/java/design.xml/LogicInversion" />
+	
+	<rule ref="category/java/design.xml/LoosePackageCoupling">
+	    <properties>
+	        <property name="packages" value="org.*" />
+	        <!-- <property name="classes" value="" />  -->
+	    </properties>
+	</rule>
+	
+	<rule ref="category/java/design.xml/UseUtilityClass">
+	    <properties>
+	        <property name="ignoredAnnotations" value="org.springframework.boot.autoconfigure.SpringBootApplication"/>
+	    </properties>
+	</rule>	
 
 	<rule ref="category/java/design.xml/AbstractClassWithoutAnyMethod" />
 	<rule ref="category/java/design.xml/AvoidCatchingGenericException" />
@@ -201,33 +223,13 @@
 	<rule ref="category/java/design.xml/DoNotExtendJavaLangError" />
 	<rule ref="category/java/design.xml/ExceptionAsFlowControl" />
 	<rule ref="category/java/design.xml/ExcessiveClassLength" />
-
-	<rule ref="category/java/design.xml/ExcessiveImports">
-	    <properties>
-	        <property name="minimum" value="50.0" />
-	    </properties>
-	</rule>
-	
 	<rule ref="category/java/design.xml/ExcessiveMethodLength" />
 	<rule ref="category/java/design.xml/ExcessiveParameterList" />
 	<rule ref="category/java/design.xml/ExcessivePublicCount" />
 	<rule ref="category/java/design.xml/FinalFieldCouldBeStatic" />
 	<rule ref="category/java/design.xml/GodClass" />
 	<rule ref="category/java/design.xml/ImmutableField" />
-
-	<!-- 
-	<rule ref="category/java/design.xml/LawOfDemeter" />
-	 -->
-
-	<rule ref="category/java/design.xml/LogicInversion" />
-	
-	<rule ref="category/java/design.xml/LoosePackageCoupling">
-	    <properties>
-	        <property name="packages" value="org.*" />
-	        <!-- <property name="classes" value="" />  -->
-	    </properties>
-	</rule>
-	
+	<rule ref="category/java/design.xml/InvalidJavaBean" />
 	<rule ref="category/java/design.xml/MutableStaticState" />
 	<rule ref="category/java/design.xml/NcssCount" />
 	<rule ref="category/java/design.xml/NPathComplexity" />
@@ -243,19 +245,12 @@
 	<rule ref="category/java/design.xml/TooManyMethods" />
 	<rule ref="category/java/design.xml/UselessOverridingMethod" />
 	<rule ref="category/java/design.xml/UseObjectForClearerAPI" />
-	<rule ref="category/java/design.xml/UseUtilityClass">
-	    <properties>
-	        <property name="ignoredAnnotations" value="org.springframework.boot.autoconfigure.SpringBootApplication"/>
-	    </properties>
-	</rule>
 
 
-	<!-- ================================================================================================================================================== -->
-	<!-- ======== DOCUMENTATION =========================================================================================================================== -->
-	<!-- ================================================================================================================================================== -->
+ <!-- ================================================================================================================================================== --> 
+ <!-- ======== DOCUMENTATION ========================================================================================================================== --> 
+ <!-- ================================================================================================================================================== --> 
 
-	<rule ref="category/java/documentation.xml/CommentContent" />
-	
 	<rule ref="category/java/documentation.xml/CommentRequired">
 		<properties>
 			<property name="violationSuppressXPath" value="//ClassOrInterfaceBodyDeclaration/MethodDeclaration/MethodDeclarator[matches(@Image,'(get|is|set)[\p{Lu}].*') and not(FormalParameters/FormalParameter)]" />
@@ -270,13 +265,27 @@
 		</properties>
 	</rule>
 	
-	
+	<rule ref="category/java/documentation.xml/CommentContent" />
 	<rule ref="category/java/documentation.xml/UncommentedEmptyConstructor" />
 	<rule ref="category/java/documentation.xml/UncommentedEmptyMethodBody" />
 
-	<!-- ================================================================================================================================================== -->
-	<!-- ======== ERROR PRONE ============================================================================================================================= -->
-	<!-- ================================================================================================================================================== -->
+
+ <!-- ================================================================================================================================================== --> 
+ <!-- ======== ERROR PRONE ============================================================================================================================= --> 
+ <!-- ================================================================================================================================================== -->
+  
+	<rule ref="category/java/errorprone.xml/NonSerializableClass" />
+	<!-- 
+	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize">
+		<properties>
+	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|org.springframework.beans.factory.annotation.Value|javax.inject.Inject|javax.persistence.Column|javax.persistence.JoinColumn|javax.persistence.ManyToOne" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config$|Test$|Builder$|Aspect$|Tasklet$|Configuration$|Reader$|Processor$|Writer$|Decider$|Mapper$')]" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />
+	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[contains(@Image, 'Service')]" />
+		</properties>
+	</rule>
+	 -->  
 
 	<rule ref="category/java/errorprone.xml/AssignmentInOperand" />
 	<rule ref="category/java/errorprone.xml/AssignmentToNonFinalStatic" />
@@ -297,19 +306,7 @@
 	<rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators" />
 	<rule ref="category/java/errorprone.xml/AvoidUsingOctalValues" />
 	<rule ref="category/java/errorprone.xml/BadComparison" />
-
-	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize">
-		<properties>
-	        <property name="ignoredAnnotations" value="lombok.Data|lombok.Getter|lombok.Value|org.springframework.beans.factory.annotation.Autowired|org.springframework.beans.factory.annotation.Value|javax.inject.Inject|javax.persistence.Column|javax.persistence.JoinColumn|javax.persistence.ManyToOne" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Service$|Controller$|Config$|Test$|Builder$|Aspect$|Tasklet$|Configuration$|Reader$|Processor$|Writer$|Decider$|Mapper$')]" />
-	        <!--
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '!^.*Bean$')]" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Controller$')]" />
-	        <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[contains(@Image, 'Service')]" />
-	        -->
-		</properties>
-	</rule>
-
+	<rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize" />
 	<rule ref="category/java/errorprone.xml/BrokenNullCheck" />
 	<rule ref="category/java/errorprone.xml/CallSuperFirst" />
 	<rule ref="category/java/errorprone.xml/CallSuperLast" />
@@ -380,9 +377,9 @@
 	<rule ref="category/java/errorprone.xml/UseEqualsToCompareStrings" />
 	<rule ref="category/java/errorprone.xml/UselessOperationOnImmutable" />
 	<rule ref="category/java/errorprone.xml/UseLocaleWithCaseConversions" />
-	<rule ref="category/java/errorprone.xml/UseProperClassLoader" />	
+	<rule ref="category/java/errorprone.xml/UseProperClassLoader" />
 
-	
+
 	<!-- ================================================================================================================================================== -->
 	<!-- ======== MULTI THREADING ========================================================================================================================= -->
 	<!-- ================================================================================================================================================== -->
@@ -398,8 +395,9 @@
 	<rule ref="category/java/multithreading.xml/UseConcurrentHashMap" />
 	<rule ref="category/java/multithreading.xml/UseNotifyAllInsteadOfNotify" />
 
+
 	<!-- ================================================================================================================================================== -->
-	<!-- ======== PERFORMANCE ============================================================================================================================= -->
+	<!-- ======== PERFORMANCE ========================================================================================================================== -->
 	<!-- ================================================================================================================================================== -->
 
 	<rule ref="category/java/performance.xml/AddEmptyString" />
@@ -433,11 +431,12 @@
 	<rule ref="category/java/performance.xml/UseStringBufferForStringAppends" />
 	<rule ref="category/java/performance.xml/UseStringBufferLength" />
 
+
 	<!-- ================================================================================================================================================== -->
-	<!-- ======== SECURITY ================================================================================================================================ -->
+	<!-- ======== SECURITY ========================================================================================================================== -->
 	<!-- ================================================================================================================================================== -->
 
 	<rule ref="category/java/security.xml/HardCodedCryptoKey" />
 	<rule ref="category/java/security.xml/InsecureCryptoIv" />
-
+	
 </ruleset>	

@@ -2,14 +2,18 @@ package org.defaultextensions.pmd;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX_ESR;
 import static java.io.File.separator;
+import static java.util.Map.entry;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.lang3.StringUtils.LF;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 import static org.apache.commons.lang3.StringUtils.containsAnyIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.replace;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringsBetween;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
+import static org.defaultextensions.DefaultExtensionsClient.getFileProperties;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -22,7 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.defaultextensions.DefaultExtensionsClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +39,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.jcabi.xml.XMLDocument;
 
-public class ValidadePmdRuleSet {
+public class ValidatePmdRuleSet {
 
     private static final String BEST_PRACTICE_KEY = "BEST PRACTICES";
     private static final String CODE_STYLE_KEY = "CODE STYLE";
@@ -42,9 +50,7 @@ public class ValidadePmdRuleSet {
     private static final String PERFORMANCE_KEY = "PERFORMANCE";
     private static final String SECURITY_KEY = "SECURITY";
 
-    private static final String PMD_VERSION = "6.52.0";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ValidadePmdRuleSet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidatePmdRuleSet.class);
 
     private static final String HEAD_FILE = """
     		<?xml version="1.0" encoding="UTF-8"?>
@@ -59,16 +65,35 @@ public class ValidadePmdRuleSet {
 
     private static final String FOOT_FILE = "</ruleset>	";
 
-    private static final String FILE_LOCATION = "/home/fernando/Development/workspaces/eclipse-workspace/default-extensions/default-extensions-files/src/main/resources/default-extensions/pmd/java";
-
     private static final String RULE_CATEGORY_SEPERATOR = """
     		          <!-- ================================================================================================================================================== -->
     		          <!-- ======== {#} ========================================================================================================================== -->
     		          <!-- ================================================================================================================================================== -->
     		   				""";
-
-    public static Map<String, List<String>> fetchRulesOnline() {
-
+    
+    private static Map<String, String> readPmdProperties() {
+	
+	final var configs = new Configurations();
+	
+	try {
+	    
+	    final var propertiesFile = getFileProperties();
+	    
+	    final var properties = configs.properties(propertiesFile);
+	    
+	    return Map.of( //
+			    "pathFile", properties.getString("pmd.rules.file.path"), //
+			    "version", properties.getString("pmd.version"), //
+			    "pathFolder", properties.getString("pmd.rules.folder") //
+	    );
+	    
+	} catch (final ConfigurationException ex) {
+	    throw new IllegalStateException(getRootCauseMessage(ex));
+	}
+    }
+    
+    private static Map<String, List<String>> fetchRulesOnline(final String version) {
+	
 	LOGGER.info("Start to fetch rules from online");
 
 	final var webClient = new WebClient(FIREFOX_ESR);
@@ -79,14 +104,14 @@ public class ValidadePmdRuleSet {
 	final var urlBase = "https://pmd.sourceforge.io/pmd-";
 
 	final var rulesCategories = List.of( //
-			Map.entry(BEST_PRACTICE_KEY, urlBase.concat(PMD_VERSION).concat("/pmd_rules_java_bestpractices.html")), // best practices
-			Map.entry(CODE_STYLE_KEY, urlBase.concat(PMD_VERSION).concat("/pmd_rules_java_codestyle.html")), // code style
-			Map.entry(DESIGN_KEY, urlBase.concat(PMD_VERSION).concat("/pmd_rules_java_design.html")), // design
-			Map.entry(DOCUMENTATION_KEY, urlBase.concat(PMD_VERSION).concat("/pmd_rules_java_documentation.html")), // documentation
-			Map.entry(ERROR_PRONE_KEY, urlBase.concat(PMD_VERSION).concat("/pmd_rules_java_errorprone.html")), // error prone
-			Map.entry(MULTITHREADING_KEY, urlBase.concat(PMD_VERSION).concat("/pmd_rules_java_multithreading.html")), // multi threading
-			Map.entry(PERFORMANCE_KEY, urlBase.concat(PMD_VERSION).concat("/pmd_rules_java_performance.html")), // perfomance
-			Map.entry(SECURITY_KEY, urlBase.concat(PMD_VERSION).concat("/pmd_rules_java_security.html")) // security
+			entry(BEST_PRACTICE_KEY, urlBase.concat(version).concat("/pmd_rules_java_bestpractices.html")), // best practices
+			entry(CODE_STYLE_KEY, urlBase.concat(version).concat("/pmd_rules_java_codestyle.html")), // code style
+			entry(DESIGN_KEY, urlBase.concat(version).concat("/pmd_rules_java_design.html")), // design
+			entry(DOCUMENTATION_KEY, urlBase.concat(version).concat("/pmd_rules_java_documentation.html")), // documentation
+			entry(ERROR_PRONE_KEY, urlBase.concat(version).concat("/pmd_rules_java_errorprone.html")), // error prone
+			entry(MULTITHREADING_KEY, urlBase.concat(version).concat("/pmd_rules_java_multithreading.html")), // multi threading
+			entry(PERFORMANCE_KEY, urlBase.concat(version).concat("/pmd_rules_java_performance.html")), // perfomance
+			entry(SECURITY_KEY, urlBase.concat(version).concat("/pmd_rules_java_security.html")) // security
 	);
 
 	final var filters = new String[] { //
@@ -98,6 +123,9 @@ public class ValidadePmdRuleSet {
 
 	final var mapRules = new HashMap<String, List<String>>();
 
+	final var watch = new StopWatch();
+	watch.start();
+	
 	try (webClient) {
 
 	    for (final var rule : rulesCategories) {
@@ -122,20 +150,23 @@ public class ValidadePmdRuleSet {
 	    throw new IllegalStateException(getRootCauseMessage(ex));
 	}
 
-	LOGGER.info("Finished fetch rules on lines");
-
+	watch.stop();
+	LOGGER.info("Finished fetch rules on lines with {} ms", watch.getTime(MILLISECONDS));
+	watch.reset();
+	
 	return mapRules;
     }
 
-    public static List<String> readRulesFile() {
+    private static List<String> readRulesFile(final String version, final String pathFile) {
 	
 	LOGGER.info("Start to read rules from file");
 	
-	final var file = FILE_LOCATION.concat(separator).concat("pmd-ruleset-").concat(PMD_VERSION).concat(".xml");
-	
-	final var certificationPath = Paths.get(file);
+	final var certificationPath = Paths.get(pathFile);
 	
 	final var result = new ArrayList<String>();
+	
+	final var watch = new StopWatch();
+	watch.start();
 	
 	try  {
 	    final var xmlString = Files.readString(certificationPath);
@@ -159,24 +190,29 @@ public class ValidadePmdRuleSet {
 		}
 	    }
 	
-	    LOGGER.info("Finished read rules from file");
-
+	    watch.stop();
+	    LOGGER.info("Finished read rules from file with {} ms", watch.getTime(MILLISECONDS));
+	    watch.reset();
+	    
 	    return result;
 	} catch (final IOException ex) {
 	    throw new IllegalStateException(ex);
 	}
     }
     
-    public static void writeRules(final Map<String, List<String>> onlineRules, final List<String> fileRules) {
+    private static void writeRules(final Map<String, List<String>> onlineRules, final List<String> fileRules, final String version, final String pathFolder) {
 	LOGGER.info("Start to write rules to file");
 	
 	final var text = new StringBuilder(HEAD_FILE);
+	
+	final var watch = new StopWatch();
+	watch.start();
 	
 	for (final var entry : onlineRules.entrySet()) {
 	    final var key = entry.getKey();
 	    final var rules = entry.getValue();
 	    
-	    text.append(RULE_CATEGORY_SEPERATOR.replace("{#}", key));
+	    text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", key));
 	    text.append(LF);
 	    
 	    for (final var rule : rules) {
@@ -206,7 +242,7 @@ public class ValidadePmdRuleSet {
 	
 	text.append(FOOT_FILE);
 	
-	final var file = FILE_LOCATION.concat(separator).concat("pmd-ruleset-").concat(PMD_VERSION).concat("-new").concat(".xml");
+	final var file = pathFolder.concat(separator).concat("pmd-ruleset-").concat(version).concat("-new").concat(".xml");
 	
 	try (final var writer = new BufferedWriter(new FileWriter(file)))  {
 	    
@@ -216,14 +252,25 @@ public class ValidadePmdRuleSet {
 	    throw new IllegalStateException(ex);
 	}
 	
-	LOGGER.info("Finished to write rules to file");
+	watch.stop();
+	LOGGER.info("Finished to write rules to file with {} ms", watch.getTime(MILLISECONDS));
+	watch.reset();
     }
 
-    public static void main(String... args) {
-	final var onlineRules = fetchRulesOnline();
+    public static void execute() {
 	
-	final var fileRules = readRulesFile();
+	final var properties = readPmdProperties();
+	
+	final var version = properties.get("version");
+	
+	final var pathFile = properties.get("pathFile");
+	
+	final var pathFolder = properties.get("pathFolder");
+	
+	final var onlineRules = fetchRulesOnline(version);
+	
+	final var fileRules = readRulesFile(version, pathFile);
 
-	writeRules(onlineRules, fileRules);
+	writeRules(onlineRules, fileRules, version, pathFolder);
     }
 }

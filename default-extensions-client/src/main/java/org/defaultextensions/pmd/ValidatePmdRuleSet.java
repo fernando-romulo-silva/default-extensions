@@ -2,6 +2,7 @@ package org.defaultextensions.pmd;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX_ESR;
 import static java.io.File.separator;
+import static java.nio.file.Files.notExists;
 import static java.util.Map.entry;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.lang3.StringUtils.LF;
@@ -30,7 +31,6 @@ import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.defaultextensions.DefaultExtensionsClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.jcabi.xml.XMLDocument;
 
 public class ValidatePmdRuleSet {
-
+    
     private static final String BEST_PRACTICE_KEY = "BEST PRACTICES";
     private static final String CODE_STYLE_KEY = "CODE STYLE";
     private static final String DESIGN_KEY = "DESIGN";
@@ -71,7 +71,7 @@ public class ValidatePmdRuleSet {
     		          <!-- ================================================================================================================================================== -->
     		   				""";
     
-    private static Map<String, String> readPmdProperties() {
+    private Map<String, String> readPmdProperties() {
 	
 	final var configs = new Configurations();
 	
@@ -84,7 +84,7 @@ public class ValidatePmdRuleSet {
 	    return Map.of( //
 			    "pathFile", properties.getString("pmd.rules.file.path"), //
 			    "version", properties.getString("pmd.version"), //
-			    "pathFolder", properties.getString("pmd.rules.folder") //
+			    "pathFolder", properties.getString("pmd.folder") //
 	    );
 	    
 	} catch (final ConfigurationException ex) {
@@ -92,9 +92,9 @@ public class ValidatePmdRuleSet {
 	}
     }
     
-    private static Map<String, List<String>> fetchRulesOnline(final String version) {
+    private Map<String, List<String>> fetchRulesOnline(final String version) {
 	
-	LOGGER.info("Start to fetch rules from online");
+	LOGGER.info("Start to fetch rules from online with {} version", version);
 
 	final var webClient = new WebClient(FIREFOX_ESR);
 	final var options = webClient.getOptions();
@@ -124,9 +124,10 @@ public class ValidatePmdRuleSet {
 	final var mapRules = new HashMap<String, List<String>>();
 
 	final var watch = new StopWatch();
-	watch.start();
 	
 	try (webClient) {
+	    
+	    watch.start();
 
 	    for (final var rule : rulesCategories) {
 
@@ -157,11 +158,15 @@ public class ValidatePmdRuleSet {
 	return mapRules;
     }
 
-    private static List<String> readRulesFile(final String version, final String pathFile) {
+    private List<String> readRulesFile(final String pathFile) {
 	
-	LOGGER.info("Start to read rules from file");
+	LOGGER.info("Start to read rules from file {}", pathFile);
 	
 	final var certificationPath = Paths.get(pathFile);
+	
+	if (notExists(certificationPath)) {
+	    return List.of();
+	}
 	
 	final var result = new ArrayList<String>();
 	
@@ -200,7 +205,7 @@ public class ValidatePmdRuleSet {
 	}
     }
     
-    private static void writeRules(final Map<String, List<String>> onlineRules, final List<String> fileRules, final String version, final String pathFolder) {
+    private void writeRules(final Map<String, List<String>> onlineRules, final List<String> fileRules, final String version, final String pathFolder) {
 	LOGGER.info("Start to write rules to file");
 	
 	final var text = new StringBuilder(HEAD_FILE);
@@ -257,7 +262,7 @@ public class ValidatePmdRuleSet {
 	watch.reset();
     }
 
-    public static void execute() {
+    public void execute() {
 	
 	final var properties = readPmdProperties();
 	
@@ -269,7 +274,7 @@ public class ValidatePmdRuleSet {
 	
 	final var onlineRules = fetchRulesOnline(version);
 	
-	final var fileRules = readRulesFile(version, pathFile);
+	final var fileRules = readRulesFile(pathFile);
 
 	writeRules(onlineRules, fileRules, version, pathFolder);
     }

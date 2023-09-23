@@ -24,8 +24,8 @@ public class DefaultExtensionsClient {
 	
     }
 
-    public static void main(String... args) {
-	ValidatePmdRuleSet.execute();
+    public static void main(final String... args) {
+	final var validatePmdRuleSet = new ValidatePmdRuleSet();
+	validatePmdRuleSet.execute();
     }
-
 }

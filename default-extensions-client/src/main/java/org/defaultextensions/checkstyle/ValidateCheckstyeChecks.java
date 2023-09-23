@@ -1,20 +1,32 @@
 package org.defaultextensions.checkstyle;
 
+import static java.nio.file.Files.notExists;
 import static java.util.Map.entry;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
+import static org.defaultextensions.DefaultExtensionsClient.getFileProperties;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.jcabi.xml.XMLDocument;
 
 public class ValidateCheckstyeChecks {
 
@@ -54,14 +66,33 @@ public class ValidateCheckstyeChecks {
     		        """;
     private static final String FOOT_FILE = "</module>	";
 
-    private static final String FILE_LOCATION = "/home/fernando/Development/workspaces/eclipse-workspace/default-extensions/default-extensions-files/src/main/resources/default-extensions/checkstyle/java";
-
     private record Check(String group, String name, String parent) {
     };
-
-    public static Map<String, List<Check>> fetchOnlineChecks() {
+    
+    private Map<String, String> readCheckStyleProperties() {
 	
-	LOGGER.info("Start to fetch checks from online");
+	final var configs = new Configurations();
+	
+	try {
+	    
+	    final var propertiesFile = getFileProperties();
+	    
+	    final var properties = configs.properties(propertiesFile);
+	    
+	    return Map.of( //
+			    "pathFile", properties.getString("checkstyle.checks.file.path"), //
+			    "version", properties.getString("checkstyle.version"), //
+			    "pathFolder", properties.getString("checkstyle.folder") //
+	    );
+	    
+	} catch (final ConfigurationException ex) {
+	    throw new IllegalStateException(getRootCauseMessage(ex));
+	}
+    }
+
+    private Map<String, List<Check>> fetchOnlineChecks(final String version) {
+	
+	LOGGER.info("Start to fetch checks from online with {} version", version);
 
 	final var url = "https://checkstyle.sourceforge.io/checks";
 
@@ -83,14 +114,21 @@ public class ValidateCheckstyeChecks {
 	);
 
 	final var mapChecks = new HashMap<String, List<Check>>();
+	
+	final var watch = new StopWatch();
 
 	try {
+	    
+	    watch.start();
+	    
 	    for (Entry<String, String> entry : ruleGroupsUrls) {
 
 		final var key = entry.getKey();
 		final var groupUrl = entry.getValue();
 
-		final var document = Jsoup.parse(new URL(groupUrl), 10000);
+		final var timeoutMillis = 100000;
+		
+		final var document = Jsoup.parse(new URL(groupUrl), timeoutMillis);
 
 		final var tds = document.select("td[align=left]");
 
@@ -102,7 +140,7 @@ public class ValidateCheckstyeChecks {
 		    final var href = hyperlink.attr("href");
 
 		    final var internalUrl = groupUrl.replace("index.html", href);
-		    final var internalDocument = Jsoup.parse(new URL(internalUrl), 10000);
+		    final var internalDocument = Jsoup.parse(new URL(internalUrl), timeoutMillis);
 
 		    final var parent = internalDocument.select("section[id=Parent_Module]").select("a").text();
 
@@ -118,24 +156,93 @@ public class ValidateCheckstyeChecks {
 	    throw new IllegalStateException(getRootCauseMessage(ex));
 	}
 
-	LOGGER.info("Finished fetch check on lines");
+	watch.stop();
+	LOGGER.info("Finished fetch check with {} ms", watch.getTime(MILLISECONDS));
+	watch.reset();
 	
 	return mapChecks;
     }
     
-    public static List<Check> readChecksFile() {
-	return List.of();
+    private List<Check> readChecksFile(final String pathFile) {
+	
+	LOGGER.info("Start to read rules from file {}", pathFile);
+	
+	final var certificationPath = Paths.get(pathFile);
+	
+	if (notExists(certificationPath)) {
+	    return List.of();
+	}
+	
+	final var result = new ArrayList<Check>();
+	
+	final var watch = new StopWatch();
+	watch.start();
+	
+	try {
+	    
+	    final var xmlString = Files.readString(certificationPath);
+	    
+	    final var xml = new XMLDocument(xmlString);
+	    
+	    final var preChecks = xml.node()
+			    .getChildNodes()
+	    		    .item(1);
+	    
+	    final var checks = new XMLDocument(preChecks).node().getChildNodes();
+	    
+	    for (var i = 0; i < checks.getLength(); i++) {
+		
+		final var element = checks.item(i);
+		final var str = new XMLDocument(element).toString().trim();
+		
+		if (StringUtils.isEmpty(str)) {
+		    continue;
+		}
+		
+		if (containsIgnoreCase(str, "<property name")) {
+		    final var strFinal = str;
+		    
+		    
+		    LOGGER.info("{}", strFinal);
+		}
+	    }
+	
+	    watch.stop();
+	    LOGGER.info("Finished read checks from file with {} ms", watch.getTime(MILLISECONDS));
+	    watch.reset();
+	    
+ 
+	} catch (final IOException ex) {
+	    throw new IllegalStateException(ex);
+	}
+	
+	return result;
     }
     
-    public static void writeChecks(final Map<String, List<Check>> onlineChecks, final List<Check> fileChecks) {
+    private void writeChecks(final Map<String, List<Check>> onlineChecks, final List<Check> fileChecks, final String version, final String pathFolder) {
 	
     }
-
-    public static void main(String... args) {
-	final var onlineChecks = fetchOnlineChecks();
+    
+    public void execute() {
 	
-	final var checkRules = readChecksFile();
+	final var properties = readCheckStyleProperties();
+	
+	final var version = properties.get("version");
+	
+	final var pathFile = properties.get("pathFile");
+	
+	final var pathFolder = properties.get("pathFolder");
+	
+//	final var onlineChecks = fetchOnlineChecks(version);
+	
+	final var fileChecks = readChecksFile(pathFile);
+	
+//	writeChecks(onlineChecks, fileChecks, version, pathFolder);
+    }
 
-	writeChecks(onlineChecks, checkRules);
+    public static void main(final String... args) {
+	
+	final var validateCheckstyeChecks = new ValidateCheckstyeChecks();
+	validateCheckstyeChecks.execute();
     }
 }

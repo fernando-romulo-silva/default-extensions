@@ -12,6 +12,8 @@ So far, I have created artifacts for Spotbugs, Checkstyle, and PMD.
 
 # Technologies 
 
+Technologies used on this project:
+ 
 - Java
 - Ant
 - Maven
@@ -19,11 +21,26 @@ So far, I have created artifacts for Spotbugs, Checkstyle, and PMD.
 - Checkstyle
 - PMD
 
+# Requirements
+
+The requirements are: 
+
+ - Java >= 8
+
+```bash
+# check the Java version
+java --version
+```
+ - Maven >= 3
+
+```bash
+# check the Maven version
+mvn --version
+```
+
 # Install
 
-requirements (environment variables configured): 
- - Java 8
- - Maven 3
+To install just execute on terminal:
  
 ```bash
 git clone https://github.com/fernando-romulo-silva/default-extensions
@@ -41,7 +58,7 @@ Then execute execute:
 mvn install
 ```
 
-# How to Use (Maven)
+# How to Use with Maven
 
 In your pom.xml project, add the following xml between `<build> ... </build>`
 

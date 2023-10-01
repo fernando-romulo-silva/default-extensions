@@ -8,24 +8,25 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMess
 import static org.defaultextensions.DefaultExtensionsClient.getFileProperties;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jcabi.xml.XML;
 import com.jcabi.xml.XMLDocument;
 
 public class ValidateCheckstyeChecks {
@@ -52,21 +53,18 @@ public class ValidateCheckstyeChecks {
     		<!DOCTYPE module PUBLIC
     		          "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
     		          "https://checkstyle.org/dtds/configuration_1_3.dtd">
-    		      <!--
-    			   Default checkstyle configuration
-    		       -->
     		      <module name="Checker">
 
-    		   <property name="charset" value="UTF-8"/>
+    		         <property name="charset" value="UTF-8"/>
 
-    		   <property name="severity" value="error"/>
+    		         <property name="severity" value="error"/>
 
-    		   <property name="fileExtensions" value="java, properties, xml"/>
+    		         <property name="fileExtensions" value="java, properties, xml"/>
 
     		        """;
     private static final String FOOT_FILE = "</module>	";
 
-    private record Check(String group, String name, String parent) {
+    private record Check(String group, String name, String value, String parent) {
     };
     
     private Map<String, String> readCheckStyleProperties() {
@@ -97,19 +95,19 @@ public class ValidateCheckstyeChecks {
 	final var url = "https://checkstyle.sourceforge.io/checks";
 
 	final var ruleGroupsUrls = List.of( //
-			entry(ANNOTATIONS_KEY, url.concat("/annotation/index.html")), //
-			entry(BLOCKS_KEY, url.concat("/blocks/index.html")), //
-			entry(DESIGN_KEY, url.concat("/design/index.html")), //
-			entry(CODING_KEY, url.concat("/coding/index.html")), //
-			entry(HEADER_KEY, url.concat("/header/index.html")), //
-			entry(IMPORTS_KEY, url.concat("/imports/index.html")), //
-			entry(JAVADOC_KEY, url.concat("/javadoc/index.html")), //
-			entry(METRICS_KEY, url.concat("/metrics/index.html")), //
-			entry(MISC_KEY, url.concat("/misc/index.html")), //
-			entry(MODIFIER_KEY, url.concat("/modifier/index.html")), //
-			entry(NAMING_KEY, url.concat("/naming/index.html")), //
-			entry(REGEXP_KEY, url.concat("/regexp/index.html")), //
-			entry(SIZES_KEY, url.concat("/sizes/index.html")), //
+//			entry(ANNOTATIONS_KEY, url.concat("/annotation/index.html")), //
+//			entry(BLOCKS_KEY, url.concat("/blocks/index.html")), //
+//			entry(DESIGN_KEY, url.concat("/design/index.html")), //
+//			entry(CODING_KEY, url.concat("/coding/index.html")), //
+//			entry(HEADER_KEY, url.concat("/header/index.html")), //
+//			entry(IMPORTS_KEY, url.concat("/imports/index.html")), //
+//			entry(JAVADOC_KEY, url.concat("/javadoc/index.html")), //
+//			entry(METRICS_KEY, url.concat("/metrics/index.html")), //
+//			entry(MISC_KEY, url.concat("/misc/index.html")), //
+//			entry(MODIFIER_KEY, url.concat("/modifier/index.html")), //
+//			entry(NAMING_KEY, url.concat("/naming/index.html")), //
+//			entry(REGEXP_KEY, url.concat("/regexp/index.html")), //
+//			entry(SIZES_KEY, url.concat("/sizes/index.html")), //
 			entry(WHITE_SPACES_KEY, url.concat("/whitespace/index.html")) //
 	);
 
@@ -121,14 +119,14 @@ public class ValidateCheckstyeChecks {
 	    
 	    watch.start();
 	    
-	    for (Entry<String, String> entry : ruleGroupsUrls) {
+	    for (final var entry : ruleGroupsUrls) {
 
 		final var key = entry.getKey();
 		final var groupUrl = entry.getValue();
 
 		final var timeoutMillis = 100000;
 		
-		final var document = Jsoup.parse(new URL(groupUrl), timeoutMillis);
+		final var document = Jsoup.parse(new URI(groupUrl).toURL(), timeoutMillis);
 
 		final var tds = document.select("td[align=left]");
 
@@ -138,21 +136,28 @@ public class ValidateCheckstyeChecks {
 
 		for (final var hyperlink : hyperlinks) {
 		    final var href = hyperlink.attr("href");
+		    final var name = StringUtils.substringAfter(href, "#");
 
 		    final var internalUrl = groupUrl.replace("index.html", href);
-		    final var internalDocument = Jsoup.parse(new URL(internalUrl), timeoutMillis);
+		    final var internalDocument = Jsoup.parse(new URI(internalUrl).toURL(), timeoutMillis);
 
-		    final var parent = internalDocument.select("section[id=Parent_Module]").select("a").text();
-
-		    listChecks.add(new Check(key, StringUtils.substringAfter(href, "#"), parent));
+		    final var parent = internalDocument.select("section[id=Parent_Module]")
+				    	.select("a")
+				    	.text();
+		    
+		    final var source = internalDocument.selectFirst("section[id=Examples]")
+				    .selectFirst("div[class=source]")
+				    .select("pre").text();
+		    
+		    listChecks.add(new Check(key, name, source, parent));
 		}
 		
-		LOGGER.debug("Key {}, qtRules {}", key, listChecks.size());
+		LOGGER.debug("Key {}, qtChecks {}", key, listChecks.size());
 
 		mapChecks.put(key, listChecks);
 	    }
 
-	} catch (final IOException ex) {
+	} catch (final IOException | URISyntaxException ex) {
 	    throw new IllegalStateException(getRootCauseMessage(ex));
 	}
 
@@ -188,24 +193,15 @@ public class ValidateCheckstyeChecks {
 			    .getChildNodes()
 	    		    .item(1);
 	    
-	    final var checks = new XMLDocument(preChecks).node().getChildNodes();
+	    final var xmlDocument = new XMLDocument(preChecks);
 	    
-	    for (var i = 0; i < checks.getLength(); i++) {
-		
-		final var element = checks.item(i);
-		final var str = new XMLDocument(element).toString().trim();
-		
-		if (StringUtils.isEmpty(str)) {
-		    continue;
-		}
-		
-		if (containsIgnoreCase(str, "<property name")) {
-		    final var strFinal = str;
-		    
-		    
-		    LOGGER.info("{}", strFinal);
-		}
-	    }
+	    final var rootProperties = xmlDocument.nodes("/module[@name='Checker']/property");
+	    
+	    final var rootModules = xmlDocument.nodes("/module[@name='Checker']/module[@name!='TreeWalker']");
+	    
+	    final var treeWalkModules = xmlDocument.nodes("/module[@name='Checker']/module[@name='TreeWalker']/module");
+	    
+	    
 	
 	    watch.stop();
 	    LOGGER.info("Finished read checks from file with {} ms", watch.getTime(MILLISECONDS));
@@ -233,11 +229,11 @@ public class ValidateCheckstyeChecks {
 	
 	final var pathFolder = properties.get("pathFolder");
 	
-//	final var onlineChecks = fetchOnlineChecks(version);
+	final var onlineChecks = fetchOnlineChecks(version);
 	
 	final var fileChecks = readChecksFile(pathFile);
 	
-//	writeChecks(onlineChecks, fileChecks, version, pathFolder);
+	writeChecks(onlineChecks, fileChecks, version, pathFolder);
     }
 
     public static void main(final String... args) {

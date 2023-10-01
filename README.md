@@ -3,6 +3,10 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Project status](https://img.shields.io/badge/Project%20status-Maintenance-orange.svg)](https://img.shields.io/badge/Project%20status-Maintenance-orange.svg)
 
+# Project status
+
+I change this project constantly improving and adding new configurations, click [here](docs/STATUS.md) to follow up.
+
 # About
 
 Build tools extensions are a list of artifacts to be used in build operations.

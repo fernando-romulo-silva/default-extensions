@@ -9,9 +9,6 @@
 	</parent>
 	
 	<properties>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.target>21</maven.compiler.target>
-
 		<maven.jar.plugin.main.class>org.defaultextensions.DefaultExtensionsClient</maven.jar.plugin.main.class>
 	</properties>
 	

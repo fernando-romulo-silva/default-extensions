@@ -23,9 +23,10 @@ Technologies used on this project:
 - Java
 - Ant
 - Maven
-- Spotbugs
-- Checkstyle
-- PMD
+- Xml artifacts (Spotbugs, Checkstyle and PMD)
+- Htmlunit
+- Httpclient
+- JSoup
 
 # Requirements
 

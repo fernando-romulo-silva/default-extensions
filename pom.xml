@@ -12,31 +12,10 @@
 	</parent>	
 
 	<name>Default Extensions</name>
-  	
   	<description>
 		A collection of application artifacts used by some project tools like pmd, cpd, etc.
     </description>
-    
-	<issueManagement>
-		<system>GITHUB</system>
-		<url>https://github.com/fernando-romulo-silva/default-extensions/blob/master/docs/STATUS.md</url>
-	</issueManagement>
-
-	<url>https://github.com/fernando-romulo-silva/default-extensions</url>
-	
-	<distributionManagement>
-	  <site>
-    	<id>github</id>
-    	<url>scm:git:git@github.com:fernando-romulo-silva/default-extensions.git</url>
-  	  </site>
-	</distributionManagement>	
-
-	<scm>
-		<url>https://github.com/fernando-romulo-silva/default-extensions</url>
-		<connection>scm:git:ssh://git@github.com/fernando-romulo-silva/default-extensions.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/fernando-romulo-silva/default-extensions.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
+	<url>https://${scm.platform}/${scm.account}/${project.artifactId}</url>
 	
 	<modules>
 		<module>default-extensions-files</module>

@@ -2,20 +2,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>default-extensions-client</artifactId>
 
-	<!--
 	<parent>
 		<groupId>org.default.extensions</groupId>
 		<artifactId>default-extensions</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	-->
 	
-	<parent>
-		<groupId>org.allset.java</groupId>
-		<artifactId>allset-java-se</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>	
-
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>

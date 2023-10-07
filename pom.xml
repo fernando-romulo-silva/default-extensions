@@ -5,38 +5,31 @@
 	<artifactId>default-extensions</artifactId>
 	<packaging>pom</packaging>
 
+	<parent>
+		<groupId>org.allset.java</groupId>
+		<artifactId>allset-java-se</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>	
+
 	<name>Default Extensions</name>
   	
   	<description>
 		A collection of application artifacts used by some project tools like pmd, cpd, etc.
     </description>
     
-    <inceptionYear>2015</inceptionYear>
-
-	<contributors>
-		<contributor>
-			<name>Fernando Romulo da Silva</name>
-		</contributor>
-	</contributors>
-
-	<prerequisites>
-		<maven>3.8.8</maven>
-	</prerequisites>
-
 	<issueManagement>
 		<system>GITHUB</system>
 		<url>https://github.com/fernando-romulo-silva/default-extensions/blob/master/docs/STATUS.md</url>
 	</issueManagement>
 
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
 	<url>https://github.com/fernando-romulo-silva/default-extensions</url>
+	
+	<distributionManagement>
+	  <site>
+    	<id>github</id>
+    	<url>scm:git:git@github.com:fernando-romulo-silva/default-extensions.git</url>
+  	  </site>
+	</distributionManagement>	
 
 	<scm>
 		<url>https://github.com/fernando-romulo-silva/default-extensions</url>

@@ -6,6 +6,13 @@ import java.nio.file.Path;
 import org.defaultextensions.pmd.ValidatePmdRuleSet;
 
 public class DefaultExtensionsClient {
+    
+    public static final String RULE_CATEGORY_SEPERATOR = """
+		          <!-- ================================================================================================================================================== -->
+		          <!-- {#} -->
+		          <!-- ================================================================================================================================================== -->
+		   				""";
+
 
     public static String getFileProperties() {
 	

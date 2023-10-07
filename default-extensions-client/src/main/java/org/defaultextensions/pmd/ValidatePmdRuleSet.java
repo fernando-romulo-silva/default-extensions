@@ -14,6 +14,7 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringsBetween;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
+import static org.defaultextensions.DefaultExtensionsClient.RULE_CATEGORY_SEPERATOR;
 import static org.defaultextensions.DefaultExtensionsClient.getFileProperties;
 
 import java.io.BufferedWriter;
@@ -65,12 +66,6 @@ public class ValidatePmdRuleSet {
 
     private static final String FOOT_FILE = "</ruleset>	";
 
-    private static final String RULE_CATEGORY_SEPERATOR = """
-    		          <!-- ================================================================================================================================================== -->
-    		          <!-- ======== {#} ========================================================================================================================== -->
-    		          <!-- ================================================================================================================================================== -->
-    		   				""";
-    
     private Map<String, String> readPmdProperties() {
 	
 	final var configs = new Configurations();

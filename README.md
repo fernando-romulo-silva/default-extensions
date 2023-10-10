@@ -58,6 +58,7 @@ This project has these modules:
 The **default-extensions-files** module has the artifact files, no code, only files.
 
 The **default-extensions-client** module is a web crawler that updates the artifact files with the newest configuration on its respective web page.
+Click [here](docs/DEFAULT-EXTENSIONS-CLIENT.md) for more information.
 
 # Install
 

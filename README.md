@@ -9,7 +9,10 @@ I change this project constantly improving and adding new configurations, click 
 
 # About
 
-Build tools extensions are a list of artifacts to be used in build operations.
+Build tools extensions are a list of artifacts to be used in build operations, usually XMLs configurations files:
+
+![Model](https://github.com/fernando-romulo-silva/default-extensions/blob/master/docs/Artifacts.png)
+
 They will be included in the running build's classpath.
 
 The idea of this project is to reuse these artifacts in all projects that make sense. 

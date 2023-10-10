@@ -11,7 +11,7 @@ I change this project constantly improving and adding new configurations, click 
 
 Build tools extensions are a list of artifacts to be used in build operations, usually XMLs configurations files:
 
-![Model](https://github.com/fernando-romulo-silva/default-extensions/blob/master/docs/Artifacts.png)
+![Model](https://github.com/fernando-romulo-silva/default-extensions/blob/main/docs/Artifacts.png)
 
 They will be included in the running build's classpath.
 

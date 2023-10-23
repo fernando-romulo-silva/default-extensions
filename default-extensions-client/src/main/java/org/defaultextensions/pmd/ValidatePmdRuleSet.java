@@ -2,15 +2,17 @@ package org.defaultextensions.pmd;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersion.FIREFOX_ESR;
 import static java.io.File.separator;
+import static java.lang.Boolean.TRUE;
 import static java.nio.file.Files.notExists;
 import static java.util.Map.entry;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.stream.Collectors.groupingBy;
 import static org.apache.commons.lang3.StringUtils.LF;
-import static org.apache.commons.lang3.StringUtils.containsAny;
 import static org.apache.commons.lang3.StringUtils.containsAnyIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.replace;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBetween;
 import static org.apache.commons.lang3.StringUtils.substringsBetween;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
@@ -23,14 +25,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,8 @@ public class ValidatePmdRuleSet {
     			""";
 
     private static final String FOOT_FILE = "</ruleset>	";
+    
+    private static final String SPACE = "	";
 
     private Map<String, String> readPmdProperties() {
 	
@@ -87,7 +91,7 @@ public class ValidatePmdRuleSet {
 	}
     }
     
-    private Map<String, List<String>> fetchRulesOnline(final String version) {
+    private List<Rule> fetchRulesOnline(final String version) {
 	
 	LOGGER.info("Start to fetch rules from online with {} version", version);
 
@@ -98,7 +102,7 @@ public class ValidatePmdRuleSet {
 
 	final var urlBase = "https://pmd.sourceforge.io/pmd-";
 
-	final var rulesCategories = List.of( //
+	final var rulesCategories = List.of( // categories
 			entry(BEST_PRACTICE_KEY, urlBase.concat(version).concat("/pmd_rules_java_bestpractices.html")), // best practices
 			entry(CODE_STYLE_KEY, urlBase.concat(version).concat("/pmd_rules_java_codestyle.html")), // code style
 			entry(DESIGN_KEY, urlBase.concat(version).concat("/pmd_rules_java_design.html")), // design
@@ -109,16 +113,9 @@ public class ValidatePmdRuleSet {
 			entry(SECURITY_KEY, urlBase.concat(version).concat("/pmd_rules_java_security.html")) // security
 	);
 
-	final var filters = new String[] { //
-		"This rule is replaced".toLowerCase(), //
-		"This rule is deprecated since".toLowerCase(), //
-		"This rule has been deprecated".toLowerCase(), //
-		"this rule is deprecated".toLowerCase() //
-	};
-
-	final var mapRules = new HashMap<String, List<String>>();
-
 	final var watch = new StopWatch();
+	
+	final var result = new ArrayList<Rule>();
 	
 	try (webClient) {
 	    
@@ -126,20 +123,28 @@ public class ValidatePmdRuleSet {
 
 	    for (final var rule : rulesCategories) {
 
-		final var rules = new ArrayList<String>();
+		final var urlRule = rule.getValue();
+		final var urlKey = rule.getKey();
 
-		final var text = webClient //
-				.<HtmlPage>getPage(rule.getValue()) //
-				.asNormalizedText();
-
-		Stream.of(substringsBetween(text, "Since: PMD", "/>")) //
-				.filter(s -> !containsAny(s.toLowerCase(), filters)) //
-				.map(s -> "<rule " + trim(substringAfter(s, "<rule")) + " />") //
-				.forEach(rules::add);
-
-		LOGGER.debug("Key {}, qtRules {}", rule.getKey(), rules.size());
+		final var rulesOnline = new ArrayList<String>();
 		
-		mapRules.put(rule.getKey(), rules);
+		final var text = webClient.<HtmlPage>getPage(urlRule).asNormalizedText();
+
+		Stream.of(substringsBetween(text, "Since: PMD", "/>"))
+				.map(s -> "<rule " + trim(substringAfter(s, "<rule")) + " />")
+				.forEach(rulesOnline::add);
+
+		for (final var ruleOnline : rulesOnline) {
+		    final var name = substringBetween(ruleOnline, "xml/", "\"");
+		    final var value = ruleOnline;
+
+		    final var deprecatedText = substringBetween(text, name, "Since: PMD");
+		    final var deprecated = containsIgnoreCase(deprecatedText, "deprecated");
+		    
+		    result.add(new Rule(name, value, urlKey, deprecated));
+		}
+		
+		LOGGER.debug("Key {}, qtRules {}", rule.getKey(), rulesOnline.size());
 	    }
 
 	} catch (final FailingHttpStatusCodeException | IOException ex) {
@@ -150,20 +155,21 @@ public class ValidatePmdRuleSet {
 	LOGGER.info("Finished fetch rules on lines with {} ms", watch.getTime(MILLISECONDS));
 	watch.reset();
 	
-	return mapRules;
+	return result;
     }
 
-    private List<String> readRulesFile(final String pathFile) {
+    private List<Rule> readRulesFile(final String pathFile) {
 	
 	LOGGER.info("Start to read rules from file {}", pathFile);
 	
 	final var certificationPath = Paths.get(pathFile);
 	
 	if (notExists(certificationPath)) {
+	    LOGGER.info("Finished read rules, no file");
 	    return List.of();
 	}
 	
-	final var result = new ArrayList<String>();
+	final var result = new ArrayList<Rule>();
 	
 	final var watch = new StopWatch();
 	watch.start();
@@ -178,14 +184,18 @@ public class ValidatePmdRuleSet {
 			    .item(0)
 			    .getChildNodes();
 
-	    for (var i=0; i < rules.getLength(); i++) {
+	    for (var i = 0; i < rules.getLength(); i++) {
 		
 		final var element = rules.item(i);
 		final var str = new XMLDocument(element).toString().trim();
 		
 		if (containsIgnoreCase(str, "<rule")) {
 		    final var strFinal = str.replace("xmlns=\"http://pmd.sourceforge.net/ruleset/2.0.0\"", "");
-		    result.add(strFinal);
+		    
+		    final var name = substringBetween(strFinal, "xml/", "\"");
+		    final var value = strFinal;
+		    
+		    result.add(new Rule(name, value));
 		    LOGGER.debug("{}", strFinal);
 		}
 	    }
@@ -200,15 +210,17 @@ public class ValidatePmdRuleSet {
 	}
     }
     
-    private void writeRules(final Map<String, List<String>> onlineRules, final List<String> fileRules, final String version, final String pathFolder) {
-	LOGGER.info("Start to write rules to file");
+    private void writeRulesFull(final List<Rule> onlineRules, final List<Rule> fileRules, final String version, final String pathFolder) {
+	LOGGER.info("Start to write full rules to file");
 	
 	final var text = new StringBuilder(HEAD_FILE);
 	
 	final var watch = new StopWatch();
 	watch.start();
 	
-	for (final var entry : onlineRules.entrySet()) {
+	final var onlineRulesMap = onlineRules.stream().collect(groupingBy(Rule::key));
+	
+	for (final var entry : onlineRulesMap.entrySet()) {
 	    final var key = entry.getKey();
 	    final var rules = entry.getValue();
 	    
@@ -217,21 +229,23 @@ public class ValidatePmdRuleSet {
 	    
 	    for (final var rule : rules) {
 		
-		final var ruleFinal = StringUtils.substringBetween(rule, "rule ref=\"", "\"");
+		if (Objects.equals(rule.deprecated(), TRUE)) {
+		    continue;
+		}
 		
 		final var optionalRule = fileRules.stream()
-						.filter(fileRule -> containsAnyIgnoreCase(fileRule, ruleFinal))
+						.filter(fileRule -> containsAnyIgnoreCase(fileRule.name(), rule.name()))
 						.findAny();
 		
 		if (optionalRule.isPresent()) { 
-		    final var valueFile = optionalRule.get().trim();
+		    final var valueFile = optionalRule.get().value().trim();
 		    
-		    text.append(valueFile.replaceAll("(?m)^[ \t]*\r?\n", ""))
+		    text.append(SPACE).append(valueFile.replaceAll("(?m)^[ \t]*\r?\n", ""))
 				    .append(LF)
 				    .append(LF);
 		    
 		} else {
-		    text.append(rule.trim())
+		    text.append(SPACE).append(rule.value().trim())
 		    		   .append(LF)
 		    		   .append(LF);
 		}
@@ -242,7 +256,7 @@ public class ValidatePmdRuleSet {
 	
 	text.append(FOOT_FILE);
 	
-	final var file = pathFolder.concat(separator).concat("pmd-ruleset-").concat(version).concat("-new").concat(".xml");
+	final var file = pathFolder.concat(separator).concat("pmd-ruleset-").concat(version).concat("-full").concat(".xml");
 	
 	try (final var writer = new BufferedWriter(new FileWriter(file)))  {
 	    
@@ -253,7 +267,73 @@ public class ValidatePmdRuleSet {
 	}
 	
 	watch.stop();
-	LOGGER.info("Finished to write rules to file with {} ms", watch.getTime(MILLISECONDS));
+	LOGGER.info("Finished to write full rules to file with {} ms", watch.getTime(MILLISECONDS));
+	watch.reset();
+    }
+    
+    private void writeRulesCorrent(final List<Rule> onlineRules, final List<Rule> fileRules, final String version, final String pathFolder) {
+	LOGGER.info("Start to write full rules to file");
+	
+	final var text = new StringBuilder(HEAD_FILE);
+	
+	final var watch = new StopWatch();
+	watch.start();
+	
+	if (ObjectUtils.isEmpty(fileRules)) {
+	    LOGGER.info("Finished read rules, no file");
+	    return;
+	}
+	
+	final var onlineRulesMap = fileRules.stream().collect(groupingBy(Rule::key));
+	
+	for (final var entry : onlineRulesMap.entrySet()) {
+	    final var key = entry.getKey();
+	    final var rules = entry.getValue();
+	    
+	    text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", key));
+	    text.append(LF);
+	    
+	    for (final var rule : rules) {
+		
+		if (Objects.equals(rule.deprecated(), TRUE)) {
+		    continue;
+		}
+		
+		final var optionalRule = fileRules.stream()
+						.filter(fileRule -> containsAnyIgnoreCase(fileRule.name(), rule.name()))
+						.findAny();
+		
+		if (optionalRule.isPresent()) { 
+		    final var valueFile = optionalRule.get().value().trim();
+		    
+		    text.append(SPACE).append(valueFile.replaceAll("(?m)^[ \t]*\r?\n", ""))
+				    .append(LF)
+				    .append(LF);
+		    
+		} else {
+		    text.append(SPACE).append(rule.value().trim())
+		    		   .append(LF)
+		    		   .append(LF);
+		}
+	    }
+	    
+	    text.append(LF);
+	}
+	
+	text.append(FOOT_FILE);
+	
+	final var file = pathFolder.concat(separator).concat("pmd-ruleset-").concat(version).concat("-full").concat(".xml");
+	
+	try (final var writer = new BufferedWriter(new FileWriter(file)))  {
+	    
+	    writer.write(text.toString());
+	    
+	} catch (final IOException ex) {
+	    throw new IllegalStateException(ex);
+	}
+	
+	watch.stop();
+	LOGGER.info("Finished to write full rules to file with {} ms", watch.getTime(MILLISECONDS));
 	watch.reset();
     }
 
@@ -262,15 +342,11 @@ public class ValidatePmdRuleSet {
 	final var properties = readPmdProperties();
 	
 	final var version = properties.get("version");
-	
 	final var pathFile = properties.get("pathFile");
-	
 	final var pathFolder = properties.get("pathFolder");
 	
 	final var onlineRules = fetchRulesOnline(version);
-	
 	final var fileRules = readRulesFile(pathFile);
-
-	writeRules(onlineRules, fileRules, version, pathFolder);
+	writeRulesFull(onlineRules, fileRules, version, pathFolder);
     }
 }

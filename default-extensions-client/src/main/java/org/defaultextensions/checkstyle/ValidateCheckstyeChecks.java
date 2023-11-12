@@ -5,14 +5,15 @@ import static java.nio.file.Files.notExists;
 import static java.util.Map.entry;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.groupingBy;
-import static org.apache.commons.lang3.StringUtils.LF;
-import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.replace;
 import static org.apache.commons.lang3.StringUtils.substringBetween;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.defaultextensions.DefaultExtensionsClient.RULE_CATEGORY_SEPERATOR;
 import static org.defaultextensions.DefaultExtensionsClient.getFileProperties;
+import static org.defaultextensions.DefaultExtensionsClient.prettyPrintByDom4j;
 import static org.defaultextensions.checkstyle.ElementType.MODULE;
 import static org.defaultextensions.checkstyle.ElementType.PROPERTY;
 
@@ -26,7 +27,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.ObjectUtils;
@@ -45,11 +48,15 @@ import com.jcabi.xml.XMLDocument;
  */
 public class ValidateCheckstyeChecks {
 
-    private static final String MODULE_NAME_CHECKER_BEGIN = "<module name=\"Checker\">";
-    private static final String MODULE_NAME_CHECKER_END = "</module>";
+    private static final String CHECKER_VALUE = "Checker";
+
+    private static final String TREE_WALKER_VALUE = "TreeWalker";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidateCheckstyeChecks.class);
-
+    
+    private static final String MODULE_NAME_TREEWALKER_BEGIN = "<module name=\"TreeWalker\">";
+    private static final String MODULE_NAME_END = "</module>";
+    
     private static final String WHITE_SPACES_KEY = "WHITE SPACES";
     private static final String SIZES_KEY = "SIZES";
     private static final String REGEXP_KEY = "REGEXP";
@@ -75,7 +82,6 @@ public class ValidateCheckstyeChecks {
     		<module name="Checker">
 
     		        """;
-    private static final String FOOT_FILE = "</module>	";
 
     private Map<String, String> readCheckStyleProperties() {
 	
@@ -105,19 +111,19 @@ public class ValidateCheckstyeChecks {
 	final var url = "https://checkstyle.sourceforge.io/checks";
 
 	final var ruleGroupsUrls = List.of( //
-//			entry(ANNOTATIONS_KEY, url.concat("/annotation/index.html")), //
-//			entry(BLOCKS_KEY, url.concat("/blocks/index.html")), //
-//			entry(DESIGN_KEY, url.concat("/design/index.html")), //
-//			entry(CODING_KEY, url.concat("/coding/index.html")), //
-//			entry(HEADER_KEY, url.concat("/header/index.html")), //
-//			entry(IMPORTS_KEY, url.concat("/imports/index.html")), //
-//			entry(JAVADOC_KEY, url.concat("/javadoc/index.html")), //
-//			entry(METRICS_KEY, url.concat("/metrics/index.html")), //
-//			entry(MISC_KEY, url.concat("/misc/index.html")), //
-//			entry(MODIFIER_KEY, url.concat("/modifier/index.html")), //
-//			entry(NAMING_KEY, url.concat("/naming/index.html")), //
-//			entry(REGEXP_KEY, url.concat("/regexp/index.html")), //
-//			entry(SIZES_KEY, url.concat("/sizes/index.html")), //
+			entry(ANNOTATIONS_KEY, url.concat("/annotation/index.html")), //
+			entry(BLOCKS_KEY, url.concat("/blocks/index.html")), //
+			entry(DESIGN_KEY, url.concat("/design/index.html")), //
+			entry(CODING_KEY, url.concat("/coding/index.html")), //
+			entry(HEADER_KEY, url.concat("/header/index.html")), //
+			entry(IMPORTS_KEY, url.concat("/imports/index.html")), //
+			entry(JAVADOC_KEY, url.concat("/javadoc/index.html")), //
+			entry(METRICS_KEY, url.concat("/metrics/index.html")), //
+			entry(MISC_KEY, url.concat("/misc/index.html")), //
+			entry(MODIFIER_KEY, url.concat("/modifier/index.html")), //
+			entry(NAMING_KEY, url.concat("/naming/index.html")), //
+			entry(REGEXP_KEY, url.concat("/regexp/index.html")), //
+			entry(SIZES_KEY, url.concat("/sizes/index.html")), //
 			entry(WHITE_SPACES_KEY, url.concat("/whitespace/index.html")) //
 	);
 
@@ -153,16 +159,10 @@ public class ValidateCheckstyeChecks {
 				    	.select("a")
 				    	.text();
 		    
-		    final var source = internalDocument.selectFirst("section[id=Examples]")
-				    .selectFirst("div[class=source]")
-				    .select("pre").text();
 		    
-		    final var value = containsIgnoreCase(source, "Checker") 
-				    ? substringBetween(source, MODULE_NAME_CHECKER_BEGIN, MODULE_NAME_CHECKER_END) 
-			            : source;
-
+		    final var value = "<module name=\"".concat(name).concat("\" />");
 		    
-		    elements.add(new Element(key, name, value, parent, MODULE));
+		    elements.add(new Element(key, name, value.trim(), parent, MODULE));
 		}
 		
 		LOGGER.debug("Key {}, qtChecks {}", key, elements.size());
@@ -212,7 +212,7 @@ public class ValidateCheckstyeChecks {
 		result.add(new Element(
 				substringBetween(rootProperty.toString(), "name=\"", "\""), 
 				rootProperty.toString(), 
-				"Checker", 
+				CHECKER_VALUE, 
 				PROPERTY
 			));  
 	    }
@@ -223,7 +223,7 @@ public class ValidateCheckstyeChecks {
 		result.add(new Element(
 				substringBetween(rootModule.toString(), "name=\"", "\""), 
 				rootModule.toString(), 
-				"Checker", 
+				CHECKER_VALUE, 
 				MODULE
 			));
 	    }
@@ -235,7 +235,7 @@ public class ValidateCheckstyeChecks {
 		result.add(new Element(
 				substringBetween(treeWalkModule.toString(), "name=\"", "\""), 
 				treeWalkModule.toString(), 
-				"TreeWalker", 
+				TREE_WALKER_VALUE, 
 				MODULE
 			));
 	    }
@@ -260,57 +260,111 @@ public class ValidateCheckstyeChecks {
 	final var watch = new StopWatch();
 	watch.start();
 	
+	// ----------------------------------------------------------------------
+	
 	final var checkerProperties = ObjectUtils.isNotEmpty(fileElements) 
 			? fileElements.stream()
-					.filter(element -> element.type() == PROPERTY && equalsIgnoreCase(element.parent(), "Checker"))
+					.filter(element -> element.type() == PROPERTY && equalsIgnoreCase(element.parent(), CHECKER_VALUE))
 					.map(Element::value)
 					.toList()
-	                : List.of("	<property name=\"charset\" value=\"UTF-8\"/>", 
-	        		  "	<property name=\"severity\" value=\"error\"/>", 
-	        		  "	<property name=\"fileExtensions\" value=\"java, properties, xml\"/>");
+	                : List.of("<property name=\"charset\" value=\"UTF-8\"/>", 
+	        		  "<property name=\"severity\" value=\"error\"/>", 
+	        		  "<property name=\"fileExtensions\" value=\"java, properties, xml\"/>");
 	
 	text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", PROPERTIES_KEY));
-	text.append(LF);
 
 	for (final var checkerProperty : checkerProperties) {
-	    text.append("	".concat(checkerProperty.trim())).append(LF);
+	    text.append(checkerProperty.trim());
 	}
 	
-	final var checkerModules = onlineChecks.stream()
-			.filter(element -> element.type() == MODULE && equalsIgnoreCase(element.parent(), "Checker"))
-			.collect(groupingBy(Element::key));
+	// ----------------------------------------------------------------------
+	
+	final var checkerModules = new TreeMap<String, List<Element>>(
+			onlineChecks.stream()
+			.filter(element -> element.type() == MODULE && equalsIgnoreCase(element.parent(), CHECKER_VALUE))
+			.collect(groupingBy(Element::key)));
 	
 	for (final var entry : checkerModules.entrySet()) {
 	    final var key = entry.getKey();
 	    final var modules = entry.getValue();
 	    
 	    text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", key));
-	    text.append(LF);
 	    
 	    for (final var module : modules) {
 		
-		final var optionalRule = fileElements.stream()
+		final var optionalElement = fileElements.stream()
 				.filter(fileElement -> equalsIgnoreCase(fileElement.name(), module.name()))
 				.findAny();
 		
-		if (optionalRule.isPresent()) {
-		    text.append(optionalRule.get().value().trim())
-	    		   .append(LF);
+		if (optionalElement.isPresent()) {
+		    
+		    final var elementFile = optionalElement.get();
+		    		
+		    final var valueFile = elementFile.value().trim();		    
+		    
+		    text.append(valueFile);
+		    
+		    if (fileElements.remove(module)) {
+			fileElements.add(new Element(module.key(), module.name(), valueFile, module.parent(), module.type()));
+		    }
 		    
 		} else {
-		    text.append(module.value().trim())
-	    		   .append(LF);
+		    text.append(module.value().trim());
 		}
 	    }
 	}
+	
+	// ----------------------------------------------------------------------
+	
+	final var treeWalkerModules = new TreeMap<String, List<Element>>(
+			onlineChecks.stream()
+			.filter(element -> element.type() == MODULE && equalsIgnoreCase(element.parent(), TREE_WALKER_VALUE))
+			.collect(groupingBy(Element::key)));
+	
+	if (!treeWalkerModules.isEmpty()) {
+	    text.append(MODULE_NAME_TREEWALKER_BEGIN);
+	    
+	    for (final var entry : treeWalkerModules.entrySet()) {
+		final var key = entry.getKey();
+		final var modules = entry.getValue();
+
+		text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", key));
+
+		for (final var module : modules) {
+
+		    final var optionalElement = fileElements.stream()
+				    .filter(fileElement -> equalsIgnoreCase(fileElement.name(), module.name()))
+				    .findAny();
+
+		    if (optionalElement.isPresent()) {
+			final var elementFile = optionalElement.get();
+
+			final var valueFile = elementFile.value().trim();
+
+			text.append(valueFile);
+
+			if (fileElements.remove(module)) {
+			    fileElements.add(new Element(module.key(), module.name(), valueFile, module.parent(), module.type()));
+			}
+
+		    } else {
+			text.append(module.value().trim());
+		    }
+		}
+	    }
+	    
+	    text.append(MODULE_NAME_END);
+	}
+	
+	// ----------------------------------------------------------------------
 			
-	text.append(FOOT_FILE);
+	text.append(MODULE_NAME_END);
 	
 	final var file = pathFolder.concat(separator).concat("checkstyle-checks-").concat(version).concat("-full").concat(".xml");
 	
 	try (final var writer = new BufferedWriter(new FileWriter(file)))  {
 	    
-	    writer.write(text.toString());
+	    writer.write(prettyPrintByDom4j(text.toString()));
 	    
 	} catch (final IOException ex) {
 	    throw new IllegalStateException(ex);
@@ -318,6 +372,123 @@ public class ValidateCheckstyeChecks {
 	
 	watch.stop();
 	LOGGER.info("Finished to write full checks to file with {} ms", watch.getTime(MILLISECONDS));
+	watch.reset();
+    }
+    
+    private void writeRulesCurrent(final List<Element> onlineChecks, final List<Element> fileElements, final String version, final String pathFolder) {
+	
+	LOGGER.info("Start to write current rules to file");
+	
+	if (ObjectUtils.isEmpty(fileElements)) {
+	    LOGGER.info("Finished write current files, no file");
+	    return;
+	}
+	
+	final var text = new StringBuilder(HEAD_FILE);
+	
+	final var watch = new StopWatch();
+	watch.start();
+	
+	
+	// ----------------------------------------------------------------------
+	
+	final var checkerPropertiesAll = fileElements.stream()
+				.filter(element -> element.type() == PROPERTY && equalsIgnoreCase(element.parent(), CHECKER_VALUE))
+				.toList();
+	
+	if (isNotEmpty(checkerPropertiesAll)) {
+
+	    text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", PROPERTIES_KEY));
+	    
+	    for (final var checkerProperty : checkerPropertiesAll) {
+		text.append(checkerProperty.value().trim());
+	    }
+	    
+	}
+	
+
+	// ---------------------------------------------------------------------
+	
+	final var checkerModulesAll = fileElements.stream()
+			.filter(element -> element.type() == MODULE && equalsIgnoreCase(element.parent(), CHECKER_VALUE))
+			.toList();
+	
+	final var checkerModulesOkay = checkerModulesAll.stream()
+			.filter(onlineChecks::contains)
+			.toList();
+
+	final var checkerModulesNotOkay = CollectionUtils.removeAll(checkerModulesAll, checkerModulesOkay);
+	
+	for (final var checkModule : checkerModulesNotOkay) {
+	    LOGGER.info("The module {} is deprecated and will be removed.", checkModule.name());
+	}
+	
+	final var checkerModules = new TreeMap<String, List<Element>>(checkerModulesOkay.stream().collect(groupingBy(Element::key)));
+	
+	for (final var entry : checkerModules.entrySet()) {
+	    final var key = entry.getKey();
+	    final var modules = entry.getValue();
+	    
+	    text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", key));
+	    
+	    for (final var module : modules) {
+		text.append(module.value().trim());
+	    }
+	}
+	
+	// ---------------------------------------------------------------------
+
+	final var treeWalkerModulesAll = fileElements.stream()
+			.filter(element -> element.type() == MODULE && equalsIgnoreCase(element.parent(), TREE_WALKER_VALUE))
+			.toList();
+	
+	final var treeWalkerModulesOkay = treeWalkerModulesAll.stream()
+			.filter(onlineChecks::contains)
+			.toList();
+
+	final var treeWalkerModulesNotOkay = CollectionUtils.removeAll(treeWalkerModulesAll, treeWalkerModulesOkay);
+	
+	for (final var checkModule : treeWalkerModulesNotOkay) {
+	    LOGGER.info("The module {} is deprecated and will be removed.", checkModule.name());
+	}
+	
+	final var treeWalkerModules = new TreeMap<String, List<Element>>(treeWalkerModulesOkay.stream().collect(groupingBy(Element::key)));
+	
+	if (!treeWalkerModules.isEmpty()) {
+	    text.append(MODULE_NAME_TREEWALKER_BEGIN);
+	
+	    for (final var entry : treeWalkerModules.entrySet()) {
+		final var key = entry.getKey();
+		final var modules = entry.getValue();
+
+		if (isNotBlank(key)) {
+		    text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", key));
+		}
+
+		for (final var module : modules) {
+		    text.append(module.value().trim());
+		}
+	    }
+	    
+	    text.append(MODULE_NAME_END);
+	}
+	
+	// ---------------------------------------------------------------------	
+	
+	text.append(MODULE_NAME_END);
+	
+	final var file = pathFolder.concat(separator).concat("checkstyle-checks-").concat(version).concat("-current").concat(".xml");
+	
+	try (final var writer = new BufferedWriter(new FileWriter(file)))  {
+	    
+	    writer.write(prettyPrintByDom4j(text.toString()));
+	    
+	} catch (final IOException ex) {
+	    throw new IllegalStateException(ex);
+	}
+	
+	watch.stop();
+	LOGGER.info("Finished to write Current rules to file with {} ms", watch.getTime(MILLISECONDS));
 	watch.reset();
     }
     
@@ -329,9 +500,11 @@ public class ValidateCheckstyeChecks {
 	final var pathFile = properties.get("pathFile");
 	final var pathFolder = properties.get("pathFolder");
 	
-	final var onlineChecks = fetchOnlineChecks(version);
 	final var fileChecks = readElementsFile(pathFile);
+	final var onlineChecks = fetchOnlineChecks(version);
+
 	writeChecksFull(onlineChecks, fileChecks, version, pathFolder);
+	writeRulesCurrent(onlineChecks, fileChecks, version, pathFolder);
     }
 
     public static void main(final String... args) {

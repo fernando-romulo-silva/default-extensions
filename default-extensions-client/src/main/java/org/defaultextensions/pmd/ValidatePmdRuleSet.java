@@ -6,10 +6,12 @@ import static java.lang.Boolean.TRUE;
 import static java.nio.file.Files.notExists;
 import static java.util.Map.entry;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.groupingBy;
 import static org.apache.commons.lang3.StringUtils.LF;
 import static org.apache.commons.lang3.StringUtils.containsAnyIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.replace;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBetween;
@@ -18,6 +20,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage;
 import static org.defaultextensions.DefaultExtensionsClient.RULE_CATEGORY_SEPERATOR;
 import static org.defaultextensions.DefaultExtensionsClient.getFileProperties;
+import static org.defaultextensions.DefaultExtensionsClient.prettyPrintByDom4j;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -28,8 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.ObjectUtils;
@@ -54,7 +59,7 @@ public class ValidatePmdRuleSet {
     private static final String SECURITY_KEY = "SECURITY";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidatePmdRuleSet.class);
-
+    
     private static final String HEAD_FILE = """
     		<?xml version="1.0" encoding="UTF-8"?>
     		<ruleset name="default-pmd-rules"
@@ -68,8 +73,6 @@ public class ValidatePmdRuleSet {
 
     private static final String FOOT_FILE = "</ruleset>	";
     
-    private static final String SPACE = "	";
-
     private Map<String, String> readPmdProperties() {
 	
 	final var configs = new Configurations();
@@ -218,7 +221,7 @@ public class ValidatePmdRuleSet {
 	final var watch = new StopWatch();
 	watch.start();
 	
-	final var onlineRulesMap = onlineRules.stream().collect(groupingBy(Rule::key));
+	final var onlineRulesMap = new TreeMap<String, List<Rule>>(onlineRules.stream().collect(groupingBy(Rule::key)));
 	
 	for (final var entry : onlineRulesMap.entrySet()) {
 	    final var key = entry.getKey();
@@ -238,16 +241,19 @@ public class ValidatePmdRuleSet {
 						.findAny();
 		
 		if (optionalRule.isPresent()) { 
-		    final var valueFile = optionalRule.get().value().trim();
+		    final var ruleFile = optionalRule.get();
 		    
-		    text.append(SPACE).append(valueFile.replaceAll("(?m)^[ \t]*\r?\n", ""))
-				    .append(LF)
-				    .append(LF);
+		    final var valueFile = ruleFile.value().trim();
+		    
+		    text.append(valueFile);
+		    
+		    if (fileRules.remove(rule)) {
+			fileRules.add(new Rule(rule.name(), ruleFile.value(), key, rule.deprecated()));
+		    }
 		    
 		} else {
-		    text.append(SPACE).append(rule.value().trim())
-		    		   .append(LF)
-		    		   .append(LF);
+		    
+		    text.append(rule.value().trim());
 		}
 	    }
 	    
@@ -260,7 +266,7 @@ public class ValidatePmdRuleSet {
 	
 	try (final var writer = new BufferedWriter(new FileWriter(file)))  {
 	    
-	    writer.write(text.toString());
+	    writer.write(prettyPrintByDom4j(text.toString()));
 	    
 	} catch (final IOException ex) {
 	    throw new IllegalStateException(ex);
@@ -271,62 +277,52 @@ public class ValidatePmdRuleSet {
 	watch.reset();
     }
     
-    private void writeRulesCorrent(final List<Rule> onlineRules, final List<Rule> fileRules, final String version, final String pathFolder) {
-	LOGGER.info("Start to write full rules to file");
+    private void writeRulesCurrent(final List<Rule> onlineRules, final List<Rule> fileRules, final String version, final String pathFolder) {
+
+	LOGGER.info("Start to write current rules to file");
+	
+	if (ObjectUtils.isEmpty(fileRules)) {
+	    LOGGER.info("Finished write current files, no file");
+	    return;
+	}
 	
 	final var text = new StringBuilder(HEAD_FILE);
 	
 	final var watch = new StopWatch();
 	watch.start();
 	
-	if (ObjectUtils.isEmpty(fileRules)) {
-	    LOGGER.info("Finished read rules, no file");
-	    return;
+	final var filesRulesOk = fileRules.stream()
+					.filter(not(Rule::deprecated))
+					.filter(onlineRules::contains) 
+					.toList();
+	
+	final var filesRulesNotOk = CollectionUtils.removeAll(fileRules, filesRulesOk);
+	for (final var rule : filesRulesNotOk) {
+	    LOGGER.info("The rule {} is deprecated and will be removed.", rule.name());
 	}
 	
-	final var onlineRulesMap = fileRules.stream().collect(groupingBy(Rule::key));
+	final var filesRulesMap = new TreeMap<String, List<Rule>>(filesRulesOk.stream().collect(groupingBy(Rule::key)));
 	
-	for (final var entry : onlineRulesMap.entrySet()) {
+	for (final var entry : filesRulesMap.entrySet()) {
 	    final var key = entry.getKey();
 	    final var rules = entry.getValue();
 	    
-	    text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", key));
-	    text.append(LF);
-	    
-	    for (final var rule : rules) {
-		
-		if (Objects.equals(rule.deprecated(), TRUE)) {
-		    continue;
-		}
-		
-		final var optionalRule = fileRules.stream()
-						.filter(fileRule -> containsAnyIgnoreCase(fileRule.name(), rule.name()))
-						.findAny();
-		
-		if (optionalRule.isPresent()) { 
-		    final var valueFile = optionalRule.get().value().trim();
-		    
-		    text.append(SPACE).append(valueFile.replaceAll("(?m)^[ \t]*\r?\n", ""))
-				    .append(LF)
-				    .append(LF);
-		    
-		} else {
-		    text.append(SPACE).append(rule.value().trim())
-		    		   .append(LF)
-		    		   .append(LF);
-		}
+	    if (isNotBlank(key)) {
+		text.append(replace(RULE_CATEGORY_SEPERATOR, "{#}", key));
 	    }
 	    
-	    text.append(LF);
+	    for (final var rule : rules) {
+		text.append(rule.value().trim());
+	    }
 	}
 	
 	text.append(FOOT_FILE);
 	
-	final var file = pathFolder.concat(separator).concat("pmd-ruleset-").concat(version).concat("-full").concat(".xml");
+	final var file = pathFolder.concat(separator).concat("pmd-ruleset-").concat(version).concat("-current").concat(".xml");
 	
 	try (final var writer = new BufferedWriter(new FileWriter(file)))  {
 	    
-	    writer.write(text.toString());
+	    writer.write(prettyPrintByDom4j(text.toString()));
 	    
 	} catch (final IOException ex) {
 	    throw new IllegalStateException(ex);
@@ -347,6 +343,8 @@ public class ValidatePmdRuleSet {
 	
 	final var onlineRules = fetchRulesOnline(version);
 	final var fileRules = readRulesFile(pathFile);
+	
 	writeRulesFull(onlineRules, fileRules, version, pathFolder);
+	writeRulesCurrent(onlineRules, fileRules, version, pathFolder);
     }
 }

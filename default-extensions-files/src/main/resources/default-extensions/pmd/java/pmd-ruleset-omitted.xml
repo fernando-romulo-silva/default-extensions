@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="default-pmd-rules" xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">  
+     <description>PMD Default Extension Rule Set</description>  
+
+	 <rule ref="category/java/codestyle.xml/OnlyOneReturn" />
+
+	 <rule ref="category/java/design.xml/LawOfDemeter">
+		<properties>
+			<property name="trustRadius" value="3" />
+		</properties>
+	 </rule>
+	 
+     <rule ref="category/java/codestyle.xml/AtLeastOneConstructor"> 
+          <properties> 
+               <property name="ignoredAnnotations" value="org.springframework.context.annotation.Configuration"/>  
+               <property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[matches(@Image, '^.*Servlet$|Filter$|Config$|Test$|Builder$')]"/> 
+          </properties> 
+     </rule>
+	 
+</ruleset>	 

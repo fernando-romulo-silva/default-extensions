@@ -4,13 +4,20 @@
           "https://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="Checker">
 
+	<property name="charset" value="UTF-8" />
+
+	<property name="severity" value="error" />
+
+	<property name="fileExtensions" value="java, properties, xml" />
 
 	<module name="FileTabCharacter" />
-    
+
+	<module name="LineLength">
+		<property name="fileExtensions" value="java" />
+	</module>
+
 	<module name="TreeWalker">
-
 		<module name="ParenPad" />
-
 	</module>
 
 </module>

@@ -16,7 +16,7 @@ Build tools extensions are a list of artifacts to be used in build operations, u
 They will be included in the running build's classpath.
 
 The idea of this project is to reuse these artifacts in all projects that make sense. 
-So far, I have created artifacts for Spotbugs, Checkstyle, and PMD.
+So far, I have created artifacts for Spotbugs, Checkstyle, etc.
 
 # Technologies 
 
@@ -24,12 +24,8 @@ Technologies used on this project:
  
 - Git
 - Java
-- Ant
+- Ant (optional)
 - Maven
-- Xml artifacts (Spotbugs, Checkstyle and PMD)
-- Htmlunit
-- Httpclient
-- JSoup
 
 # Requirements
 

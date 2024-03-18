@@ -3,9 +3,14 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Project status](https://img.shields.io/badge/Project%20status-Maintenance-orange.svg)](https://img.shields.io/badge/Project%20status-Maintenance-orange.svg)
 
-# Project status
+# Project Status
 
 I change this project constantly improving and adding new configurations, click [here](docs/STATUS.md) to follow up.
+
+# The Problem
+
+Great, you are using excellent tools like PMD, Spotbugs, Checkstyle, etc., but this tools also have configurations files, and you are spreading this files in ALL projects that has the same configurations. <br />
+You could centralize this configurations files in one place...
 
 # About
 
